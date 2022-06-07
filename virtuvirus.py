@@ -6,19 +6,20 @@ from random import randint, random
 
 # Config
 WIDTH, HEIGHT = 800, 600		# Size of the window.
-xspeed = yspeed = 4				# Speed of the agents.
+maxYSpeed = maxYSpeed = 4		# Speed of the agents.
 size = 10						# Size of the agents.
-infective_range = 3				# Range of infection is defined by the size multiplied by this number.
+infective_range = 4				# Range of infection is defined by the size multiplied by this number.
 frequency = 0.04				# Controls the interval the agents wait before performing their routines (movement, infection, etc...) again.
-fluidity = 2					# Controls how much the program will attempt to avoid slowdowns.
 infectionChance = 0.1
+numberOfAgents = 49
+numberOfInfectedAgents = 1
 
 # ---------------------------------------------------------- Utilities ----------------------------------------------------------
-def createThread(target, args):
+def createThread(array, target, args):
 	thread = Thread(target=target, args=args)
 	thread.daemon = True
 	thread.start()
-	threads.append(thread)
+	array.append(thread)
 	return thread
 
 def get2CenterCoordsFrom4Coords(leftPos, topPos, rightPos, bottomPos):
@@ -28,19 +29,19 @@ def get2CenterCoordsFrom4Coords(leftPos, topPos, rightPos, bottomPos):
 def createAgents(quantity, areInfected):
 	for i in range(quantity):
 		createAgent(areInfected)
-		sleep(random()*frequency*fluidity) # This trick prevents the agents from all running their checks at the EXACT same time. Helps against lag.
+		sleep(0.001) # This trick prevents the agents from all running their checks at the EXACT same time. Helps against lag.
 
 def createAgent(isInfected):
 	global size
-
+	
 	x_position, y_position = randint(0, WIDTH), randint(0, HEIGHT)
 
 	agent = canvas.create_oval(x_position, y_position, x_position+size, y_position+size, fill="blue")
 
-	thread_movement = createThread(moveAgent, (agent,))
+	thread_movement = createThread(AgentMovementThreads, moveAgent, (agent,))
 
 	if isInfected:
-		thread_infectious = createThread(infectAgent, (agent,))
+		thread_infectious = createThread(InfectionThreads, infectAgent, (agent,))
 
 	return agent
 
@@ -69,14 +70,14 @@ def infectAgent(agent):
 			if overlapping_agent != agent and overlapping_agent != agent_infectious_zone:
 				if canvas.itemcget(overlapping_agent, "fill") == "blue" and random() >= (1 - infectionChance): # Only infect uninfected agents, and give them a chance to escape unharmed.
 					canvas.itemconfig(overlapping_agent, fill="red")
-					createThread(infectAgent, (overlapping_agent,))
+					createThread(InfectionThreads, infectAgent, (overlapping_agent,))
 
 		sleep(frequency * 0.8)
 
 def moveAgent(agent):
-	global xspeed, yspeed, shutdown
+	global maxYSpeed, maxYSpeed, shutdown
 
-	local_x_speed, local_y_speed = xspeed, yspeed
+	local_x_speed, local_y_speed = maxYSpeed*random(), maxYSpeed*random()
 
 	if randint(0, 1) == 1:
 		local_x_speed *= -1
@@ -102,8 +103,14 @@ canvas = Canvas(root, width=WIDTH, height=HEIGHT, bg="white")
 canvas.pack()
 
 shutdown = False
-threads = []
 
-canvas.after(30, createAgents(20, False))
-canvas.after(30, createAgents(1, True))
+AgentMovementThreads = []
+InfectionThreads = []
+DefaultThreads = []
+
+def main():
+	createAgents(numberOfAgents, False)
+	createAgents(numberOfInfectedAgents, True)
+MainThread = createThread(DefaultThreads, main, ())
+
 root.mainloop()
