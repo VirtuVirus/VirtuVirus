@@ -12,8 +12,6 @@ size = 10						# Size of the agents.
 infective_range = 4				# Range of infection is defined by the size multiplied by this number.
 frequency = 0.04				# Controls the interval the agents wait before performing their routines (movement, infection, etc...) again.
 infectionChance = 0.02			# Chance per FRAME for the agent to be infected.
-numberOfAgents = 49
-numberOfInfectedAgents = 1
 
 # ---------------------------------------------------------- Utilities ----------------------------------------------------------
 def createThread(array, target, args):
@@ -43,9 +41,11 @@ def createAgent(isInfected):
 
 	# We give it movement
 	thread_movement = createThread(AgentMovementThreads, moveAgent, (agent,))
+	AgentMovementThreads.append(thread_movement)
 
 	if isInfected:
 		thread_infectious = createThread(InfectionThreads, infectAgent, (agent,))
+		InfectionThreads.append(thread_infectious)
 	else:
 		SaneAgents.append(agent)
 
@@ -54,7 +54,7 @@ def createAgent(isInfected):
 def infectAgent(agent):
 	canvas.itemconfig(agent, fill="red")
 
-	global infective_range
+	global infective_range, SimulationStopControl, infectionChance
 
 	# We create the infectious zone and append it.
 	agent_infectious_zone = canvas.create_oval(0, 0, 0+(size*infective_range), 0+(size*infective_range), )
@@ -66,7 +66,7 @@ def infectAgent(agent):
 	if(agent not in InfectedAgents):
 		InfectedAgents.append(agent)
 
-	while shutdown == False:
+	while SimulationStopControl == False:
 		# Get cords of the agents and the agents' infectious zone.
 		(AgentLeftPos, AgentTopPos, AgentRightPos, AgentBottomPos) = canvas.coords(agent)
 		(InfectLeftPos, InfectTopPos, InfectRightPos, InfectBottomPos) = canvas.coords(agent_infectious_zone)
@@ -87,9 +87,10 @@ def infectAgent(agent):
 					createThread(InfectionThreads, infectAgent, (overlapping_agent,))
 
 		sleep(frequency * 0.8)
+	return
 
 def moveAgent(agent):
-	global maxYSpeed, maxYSpeed, shutdown
+	global maxYSpeed, maxYSpeed, SimulationStopControl
 
 	# Generate random starter movement
 	local_x_speed, local_y_speed = maxYSpeed*random(), maxYSpeed*random()
@@ -98,7 +99,7 @@ def moveAgent(agent):
 	if randint(0, 1) == 1:
 		local_y_speed *= -1
 
-	while shutdown == False:
+	while SimulationStopControl == False:
 		# Make the agents bounce against the screen borders.
 		canvas.move(agent, local_x_speed, local_y_speed)
 
@@ -109,11 +110,50 @@ def moveAgent(agent):
 		if topPos <= 0 or bottomPos >= HEIGHT:
 			local_y_speed = -local_y_speed
 		sleep(frequency)
+	return
+
+def stopSimulation():
+	global SimulationStopControl
+	# Indicate that the simulation is stopping.
+	SimulationStopControl = True
+
+	# Wait for all threads to stop.
+	if(len(Agents) < 40):
+		for thread in AgentMovementThreads:
+			thread.join()
+		for thread in InfectionThreads:
+			thread.join()
+		
+		InfectionThreads.clear()
+		AgentMovementThreads.clear()
+		InfectedZones.clear()
+	else: # Waiting the normal way becomes unstable after approximately 30 agents, and can freeze. Better cause errors than a complete crash.
+		InfectionThreads.clear()
+		AgentMovementThreads.clear()
+		InfectedZones.clear()
+
+		sleep(1)
+
+	SimulationStopControl = False
+
+	return
+
+def clearSimulation():
+	stopSimulation()
+
+	# Clear the canvas.
+	canvas.delete("all")
+
+	# Clear the lists.
+	Agents.clear()
+	SaneAgents.clear()
+	InfectedAgents.clear()
 
 # ---------------------------------------------------------- Program ----------------------------------------------------------
 root = Tk()
 root.title("VirtuVirus")
 root.iconname("VirtuVirus")
+root.resizable(False, False)
 
 # Set icon
 if "win" in platform:
@@ -132,11 +172,27 @@ canvas.pack(side=RIGHT)
 
 # Add controls to the left of the frame
 controls = Frame(frame)
-controls.pack(side=LEFT)
+controls.pack(side=LEFT, padx=10)
 
+# Add controls label
+controls_label = Label(controls, text="Controls")
+controls_label.pack(pady=10)
+
+# Add button to the left that adds agents
+add_agents_button = Button(controls, text="Add agents", command=lambda: createAgents(10, False))
+add_agents_button.pack(side=TOP)
+# Add button to the left that adds infected agents
+add_infected_agents_button = Button(controls, text="Add infected agent", command=lambda: createAgent(True))
+add_infected_agents_button.pack(side=TOP)
+# Add button to stop simulation
+stop_button = Button(controls, text="Stop", command=lambda: stopSimulation())
+stop_button.pack(side=TOP)
+# Add button to clear the canvas
+clear_button = Button(controls, text="Clear", command=lambda: clearSimulation())
+clear_button.pack(side=TOP)
 
 # Variable
-shutdown = False
+SimulationStopControl = False
 
 # We configure the lists.
 Agents = []
@@ -150,15 +206,12 @@ DefaultThreads = []
 
 # Main thread, since root.mainloop() blocks the program.
 def main():
-	createAgents(numberOfAgents, False)
-	createAgents(numberOfInfectedAgents, True)
-
 	# Add statistics to the right of the window.
 	statistics = Label(root, text="Statistics : Agents = "+str(len(Agents))+" | Sane = "+str(len(SaneAgents))+" | Infected = "+str(len(InfectedAgents)))
 	statistics.pack(side=LEFT)
 
 	# Update statistics
-	while shutdown == False:
+	while True:
 		sleep(1)
 		statistics.config(text="Statistics : Agents = "+str(len(Agents))+" | Sane = "+str(len(SaneAgents))+" | Infected = "+str(len(InfectedAgents)))
 MainThread = createThread(DefaultThreads, main, ())
