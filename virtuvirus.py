@@ -3,6 +3,7 @@ from tkinter import *
 from time import sleep
 from threading import Thread
 from random import randint, random
+from sys import platform
 
 # Config
 WIDTH, HEIGHT = 800, 600		# Size of the window.
@@ -10,7 +11,7 @@ maxYSpeed = maxYSpeed = 4		# Speed of the agents.
 size = 10						# Size of the agents.
 infective_range = 4				# Range of infection is defined by the size multiplied by this number.
 frequency = 0.04				# Controls the interval the agents wait before performing their routines (movement, infection, etc...) again.
-infectionChance = 0.1
+infectionChance = 0.02			# Chance per FRAME for the agent to be infected.
 numberOfAgents = 49
 numberOfInfectedAgents = 1
 
@@ -80,8 +81,8 @@ def infectAgent(agent):
 		# Infect overlapping agents
 		overlapping_agents = canvas.find_overlapping(InfectLeftPos, InfectTopPos, InfectRightPos, InfectBottomPos)
 		for overlapping_agent in overlapping_agents:
-			if overlapping_agent != agent and overlapping_agent != agent_infectious_zone:
-				if canvas.itemcget(overlapping_agent, "fill") == "blue" and random() >= (1 - infectionChance): # Only infect uninfected agents, and give them a chance to escape unharmed.
+			if overlapping_agent != agent and overlapping_agent != agent_infectious_zone and overlapping_agent in SaneAgents:
+				if random() > (1 - infectionChance): # Give them a chance to escape unharmed.
 					canvas.itemconfig(overlapping_agent, fill="red")
 					createThread(InfectionThreads, infectAgent, (overlapping_agent,))
 
@@ -112,10 +113,29 @@ def moveAgent(agent):
 # ---------------------------------------------------------- Program ----------------------------------------------------------
 root = Tk()
 root.title("VirtuVirus")
+root.iconname("VirtuVirus")
 
-canvas = Canvas(root, width=WIDTH, height=HEIGHT, bg="white")
-canvas.pack()
+# Set icon
+if "win" in platform:
+	root.wm_iconbitmap(default="assets/icon.ico")
+else:
+	img = PhotoImage(file='assets/icon.png')
+	root.tk.call('wm', 'iconphoto', root._w, img)
 
+# Create frame at the top
+frame = Frame(root)
+frame.pack(side=TOP)
+
+# Create canvas
+canvas = Canvas(frame, width=WIDTH, height=HEIGHT, bg="white")
+canvas.pack(side=RIGHT)
+
+# Add controls to the left of the frame
+controls = Frame(frame)
+controls.pack(side=LEFT)
+
+
+# Variable
 shutdown = False
 
 # We configure the lists.
