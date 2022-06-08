@@ -29,19 +29,24 @@ def get2CenterCoordsFrom4Coords(leftPos, topPos, rightPos, bottomPos):
 def createAgents(quantity, areInfected):
 	for i in range(quantity):
 		createAgent(areInfected)
-		sleep(0.001) # This trick prevents the agents from all running their checks at the EXACT same time. Helps against lag.
+		sleep(0.005) # This trick prevents the agents from all running their checks at the EXACT same time. Helps against lag.
 
 def createAgent(isInfected):
 	global size
 	
+	# Randomly place the agent.
 	x_position, y_position = randint(0, WIDTH), randint(0, HEIGHT)
 
 	agent = canvas.create_oval(x_position, y_position, x_position+size, y_position+size, fill="blue")
+	Agents.append(agent)
 
+	# We give it movement
 	thread_movement = createThread(AgentMovementThreads, moveAgent, (agent,))
 
 	if isInfected:
 		thread_infectious = createThread(InfectionThreads, infectAgent, (agent,))
+	else:
+		SaneAgents.append(agent)
 
 	return agent
 
@@ -50,10 +55,18 @@ def infectAgent(agent):
 
 	global infective_range
 
+	# We create the infectious zone and append it.
 	agent_infectious_zone = canvas.create_oval(0, 0, 0+(size*infective_range), 0+(size*infective_range), )
+	InfectedZones.append(agent_infectious_zone)
+
+	# We add the agent to the infected agents.
+	if(agent in SaneAgents):
+		SaneAgents.remove(agent)
+	if(agent not in InfectedAgents):
+		InfectedAgents.append(agent)
 
 	while shutdown == False:
-		# Get cords
+		# Get cords of the agents and the agents' infectious zone.
 		(AgentLeftPos, AgentTopPos, AgentRightPos, AgentBottomPos) = canvas.coords(agent)
 		(InfectLeftPos, InfectTopPos, InfectRightPos, InfectBottomPos) = canvas.coords(agent_infectious_zone)
 
@@ -77,14 +90,15 @@ def infectAgent(agent):
 def moveAgent(agent):
 	global maxYSpeed, maxYSpeed, shutdown
 
+	# Generate random starter movement
 	local_x_speed, local_y_speed = maxYSpeed*random(), maxYSpeed*random()
-
 	if randint(0, 1) == 1:
 		local_x_speed *= -1
 	if randint(0, 1) == 1:
 		local_y_speed *= -1
 
 	while shutdown == False:
+		# Make the agents bounce against the screen borders.
 		canvas.move(agent, local_x_speed, local_y_speed)
 
 		(leftPos, topPos, rightPos, bottomPos) = canvas.coords(agent)
@@ -95,7 +109,7 @@ def moveAgent(agent):
 			local_y_speed = -local_y_speed
 		sleep(frequency)
 
-# Program
+# ---------------------------------------------------------- Program ----------------------------------------------------------
 root = Tk()
 root.title("VirtuVirus")
 
@@ -104,13 +118,29 @@ canvas.pack()
 
 shutdown = False
 
+# We configure the lists.
+Agents = []
+SaneAgents = []
+InfectedAgents = []
+InfectedZones = []
+
 AgentMovementThreads = []
 InfectionThreads = []
 DefaultThreads = []
 
+# Main thread, since root.mainloop() blocks the program.
 def main():
 	createAgents(numberOfAgents, False)
 	createAgents(numberOfInfectedAgents, True)
+
+	# Add statistics to the right of the window.
+	statistics = Label(root, text="Statistics : Agents = "+str(len(Agents))+" | Sane = "+str(len(SaneAgents))+" | Infected = "+str(len(InfectedAgents)))
+	statistics.pack(side=LEFT)
+
+	# Update statistics
+	while shutdown == False:
+		sleep(1)
+		statistics.config(text="Statistics : Agents = "+str(len(Agents))+" | Sane = "+str(len(SaneAgents))+" | Infected = "+str(len(InfectedAgents)))
 MainThread = createThread(DefaultThreads, main, ())
 
 root.mainloop()
