@@ -4,6 +4,7 @@ from time import sleep
 from threading import Thread
 from random import randint, random
 from sys import platform
+from math import sqrt
 
 # ---------------------------------------------------------- Config ----------------------------------------------------------
 # Simulation config
@@ -13,16 +14,19 @@ framerate = 24									# Define framerate here. It's the basis for the interval 
 # Agents
 maxXSpeed = maxYSpeed = 96						# Speed of the agents.
 size = 10										# Size of the agents.
+centralBehaviorChance = 0.1						# Chance of the central behavior to be activated per second.
+centralBehaviorRange = 25
 
 # Virus
 infective_range = 4								# Range of infection is defined by the size multiplied by this number.
-infectionChance = 0.48							# Chance per FRAME for the agent to be infected.
-defaultRecoveryChance = 0.024					# Chance to recover by default on each frame.
-defaultRecoveryChanceProgress = 0.00036			# Progression on each frame
+infectionChance = 0.48							# Chance per second for the agent to be infected.
+defaultRecoveryChance = 0.024					# Chance to recover by default on each second.
+defaultRecoveryChanceProgress = 0.00036			# Progression on each second
 
 # Keep config stable no matter the framerate
 frequency = 1/framerate							# Controls the interval the agents wait before performing their routines (movement, infection, etc...) again. Preferred value is 0.04.
 maxXSpeed = maxYSpeed = maxYSpeed/framerate		# Movement gained per frame.
+centralBehaviorChance /= framerate
 infectionChance /= framerate					# Chance per FRAME for the agent to be infected.
 defaultRecoveryChance /= framerate				# Chance to recover by default on each frame.
 defaultRecoveryChanceProgress /= framerate		# Progression on each frame
@@ -39,11 +43,15 @@ def createThread(array, target, args):
 def get2CenterCoordsFrom4Coords(leftPos, topPos, rightPos, bottomPos):
 	return ((leftPos+rightPos)/2, (topPos+bottomPos)/2)
 
+def getCentralCenterCordsFromTopLeftCords(CenterX, CenterY):
+	return (CenterX - WIDTH/2, CenterY - HEIGHT/2)
+
 # -------------------------------------------------------- Agents Functions ------------------------------------------------------
 def createAgents(quantity, type):
 	for i in range(quantity):
 		createAgent(type)
 		sleep(0.005) # This trick prevents the agents from all running their checks at the EXACT same time. Helps against lag.
+	return
 
 def createAgent(type):
 	global size
@@ -65,7 +73,6 @@ def createAgent(type):
 		ImmunizeAgent(agent)
 	else:
 		SaneAgents.append(agent)
-
 	return agent
 
 def ImmunizeAgent(agent):
@@ -74,8 +81,7 @@ def ImmunizeAgent(agent):
 	ImmuneAgents.append(agent)
 	if agent in InfectedAgents:
 		InfectedAgents.remove(agent)
-	#if agent not in SaneAgents:
-	#	SaneAgents.append(agent)
+	return
 
 def infectAgent(agent):
 	canvas.itemconfig(agent, fill="red")
@@ -132,6 +138,41 @@ def moveAgent(agent):
 		local_y_speed *= -1
 
 	while SimulationStopSignal == False:
+		# Central Behavior
+		if centralBehavior == True:
+			chanceToLaunchCentralBehavior = random()
+
+			# If the agent is infected, we make the chance lower.
+			if agent in InfectedAgents:
+				chanceToLaunchCentralBehavior /= 3
+			# If the agent is immune, we make the chance higher.
+			if agent in ImmuneAgents:
+				chanceToLaunchCentralBehavior *= 1.3
+			
+			if chanceToLaunchCentralBehavior < centralBehaviorChance:
+				(AgentLeftPos, AgentTopPos, AgentRightPos, AgentBottomPos) = canvas.coords(agent)
+				(CenterX, CenterY) = get2CenterCoordsFrom4Coords(AgentLeftPos, AgentTopPos, AgentRightPos, AgentBottomPos)
+
+				testCordX, testCordY = getCentralCenterCordsFromTopLeftCords(CenterX, CenterY)
+
+				while SimulationStopSignal == False and centralBehavior == True and sqrt(testCordX**2 + testCordY**2) > centralBehaviorRange :
+					# Go to center
+					local_x_speed, local_y_speed = (WIDTH/2 - CenterX)/framerate, (HEIGHT/2 - CenterY)/framerate
+					canvas.move(agent, local_x_speed, local_y_speed)
+
+					(AgentLeftPos, AgentTopPos, AgentRightPos, AgentBottomPos) = canvas.coords(agent)
+					(CenterX, CenterY) = get2CenterCoordsFrom4Coords(AgentLeftPos, AgentTopPos, AgentRightPos, AgentBottomPos)
+					testCordX, testCordY = getCentralCenterCordsFromTopLeftCords(CenterX, CenterY)
+
+					sleep(frequency)
+				
+				# Regenerate starter movement
+				local_x_speed, local_y_speed = maxXSpeed*random(), maxYSpeed*random()
+				if randint(0, 1) == 1:
+					local_x_speed *= -1
+				if randint(0, 1) == 1:
+					local_y_speed *= -1
+
 		# Make the agents bounce against the screen borders.
 		canvas.move(agent, local_x_speed, local_y_speed)
 
@@ -150,37 +191,33 @@ def stopSimulation():
 	SimulationStopSignal = True
 
 	# Wait for all threads to stop.
-	if(len(Agents) < 40):
-		for thread in AgentMovementThreads:
-			thread.join()
-		for thread in InfectionThreads:
-			thread.join()
-		
-		InfectionThreads.clear()
-		AgentMovementThreads.clear()
-		InfectedZones.clear()
-	else: # Waiting the normal way becomes unstable after approximately 30 agents, and can freeze. Better cause errors than a complete crash.
-		InfectionThreads.clear()
-		AgentMovementThreads.clear()
-		InfectedZones.clear()
+	sleep(1)
 
-		sleep(1)
+	InfectionThreads.clear()
+	AgentMovementThreads.clear()
+	InfectedZones.clear()
 
 	SimulationStopSignal = False
-
 	return
 
 def clearSimulation():
 	stopSimulation()
 
-	# Clear the canvas.
-	canvas.delete("all")
+	# Delete all the agents from the canvas
+	for agent in Agents:
+		canvas.delete(agent)
 
 	# Clear the lists.
 	Agents.clear()
 	SaneAgents.clear()
 	InfectedAgents.clear()
 	ImmuneAgents.clear()
+	return
+
+def ToggleCentralBehavior():
+	global centralBehavior
+	centralBehavior = not centralBehavior
+	return
 
 # ---------------------------------------------------------- Program ----------------------------------------------------------
 root = Tk()
@@ -217,6 +254,9 @@ add_agents_button.pack(side=TOP)
 # Add button to the left that adds infected agents
 add_infected_agents_button = Button(controls, text="Add infected agent", command=lambda: createAgent("Infected"))
 add_infected_agents_button.pack(side=TOP)
+# Add button to toggle Central Behavior
+central_behavior_button = Button(controls, text="Toggle Central Behavior", command=ToggleCentralBehavior)
+central_behavior_button.pack(side=TOP)
 # Add button to stop simulation
 stop_button = Button(controls, text="Stop", command=lambda: stopSimulation())
 stop_button.pack(side=TOP)
@@ -225,6 +265,7 @@ clear_button = Button(controls, text="Clear", command=lambda: clearSimulation())
 clear_button.pack(side=TOP)
 
 # Variable
+centralBehavior = True
 SimulationStopSignal = False
 cureSignal = False
 
