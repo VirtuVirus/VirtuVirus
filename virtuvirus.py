@@ -5,15 +5,28 @@ from threading import Thread
 from random import randint, random
 from sys import platform
 
-# Config
-WIDTH, HEIGHT = 800, 600		# Size of the window.
-maxYSpeed = maxYSpeed = 4		# Speed of the agents.
-size = 10						# Size of the agents.
-infective_range = 4				# Range of infection is defined by the size multiplied by this number.
-frequency = 0.04				# Controls the interval the agents wait before performing their routines (movement, infection, etc...) again.
-infectionChance = 0.02			# Chance per FRAME for the agent to be infected.
-defaultRecoveryChance = 0.001				# Chance to recover by default
-defaultRecoveryChanceProgress = 0.000015		# Progression on each frame
+# ---------------------------------------------------------- Config ----------------------------------------------------------
+# Simulation config
+WIDTH, HEIGHT = 800, 600						# Size of the window.
+framerate = 24									# Define framerate here. It's the basis for the interval between each frame of the simulation.
+
+# Agents
+maxXSpeed = maxYSpeed = 96						# Speed of the agents.
+size = 10										# Size of the agents.
+
+# Virus
+infective_range = 4								# Range of infection is defined by the size multiplied by this number.
+infectionChance = 0.48							# Chance per FRAME for the agent to be infected.
+defaultRecoveryChance = 0.024					# Chance to recover by default on each frame.
+defaultRecoveryChanceProgress = 0.00036			# Progression on each frame
+
+# Keep config stable no matter the framerate
+frequency = 1/framerate							# Controls the interval the agents wait before performing their routines (movement, infection, etc...) again. Preferred value is 0.04.
+maxXSpeed = maxYSpeed = maxYSpeed/framerate		# Movement gained per frame.
+infectionChance /= framerate					# Chance per FRAME for the agent to be infected.
+defaultRecoveryChance /= framerate				# Chance to recover by default on each frame.
+defaultRecoveryChanceProgress /= framerate		# Progression on each frame
+
 
 # ---------------------------------------------------------- Utilities ----------------------------------------------------------
 def createThread(array, target, args):
@@ -112,7 +125,7 @@ def infectAgent(agent):
 
 def moveAgent(agent):
 	# Generate random starter movement
-	local_x_speed, local_y_speed = maxYSpeed*random(), maxYSpeed*random()
+	local_x_speed, local_y_speed = maxXSpeed*random(), maxYSpeed*random()
 	if randint(0, 1) == 1:
 		local_x_speed *= -1
 	if randint(0, 1) == 1:
