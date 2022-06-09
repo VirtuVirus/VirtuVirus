@@ -1,5 +1,6 @@
 # Imports
 from tkinter import *
+from tkinter import ttk
 from time import sleep
 from threading import Thread
 from random import randint, random
@@ -15,7 +16,8 @@ framerate = 24									# Define framerate here. It's the basis for the interval 
 maxXSpeed = maxYSpeed = 96						# Speed of the agents.
 size = 10										# Size of the agents.
 centralBehaviorChance = 0.1						# Chance of the central behavior to be activated per second.
-centralBehaviorRange = 25
+centralBehaviorRange = 30						# Range of the central area the agents will try to get to.
+doHumanThinking = True							# Agents' actions will depend on the number of infected.
 
 # Virus
 infective_range = 4								# Range of infection is defined by the size multiplied by this number.
@@ -126,6 +128,8 @@ def infectAgent(agent):
 			return
 		localRecoveryChanceProgress += defaultRecoveryChanceProgress
 
+		if SimulationStopSignal:
+			return
 		sleep(frequency * 0.8)
 	return
 
@@ -138,18 +142,23 @@ def moveAgent(agent):
 		local_y_speed *= -1
 
 	while SimulationStopSignal == False:
+		# Prevent thread surviving
+		if agent not in Agents or len(AgentMovementThreads) == 0:
+			return
+
 		# Central Behavior
 		if centralBehavior == True:
 			chanceToLaunchCentralBehavior = random()
 
-			# If the agent is infected, we make the chance lower.
-			if agent in InfectedAgents:
-				chanceToLaunchCentralBehavior /= 3
-			# If the agent is immune, we make the chance higher.
-			if agent in ImmuneAgents:
-				chanceToLaunchCentralBehavior *= 1.3
+			if doHumanThinking:
+				# If the agent is infected, we make the chance lower.
+				if agent in InfectedAgents:
+					chanceToLaunchCentralBehavior /= 3
+				# If there are lots of infected, we make the chance lower.
+				if agent in SaneAgents:
+					chanceToLaunchCentralBehavior *= 1 - len(InfectedAgents)/len(Agents)
 			
-			if chanceToLaunchCentralBehavior < centralBehaviorChance:
+			if chanceToLaunchCentralBehavior >= (1 - centralBehaviorChance):
 				(AgentLeftPos, AgentTopPos, AgentRightPos, AgentBottomPos) = canvas.coords(agent)
 				(CenterX, CenterY) = get2CenterCoordsFrom4Coords(AgentLeftPos, AgentTopPos, AgentRightPos, AgentBottomPos)
 
@@ -164,6 +173,8 @@ def moveAgent(agent):
 					(CenterX, CenterY) = get2CenterCoordsFrom4Coords(AgentLeftPos, AgentTopPos, AgentRightPos, AgentBottomPos)
 					testCordX, testCordY = getCentralCenterCordsFromTopLeftCords(CenterX, CenterY)
 
+					if SimulationStopSignal:
+						return
 					sleep(frequency)
 				
 				# Regenerate starter movement
@@ -172,16 +183,20 @@ def moveAgent(agent):
 					local_x_speed *= -1
 				if randint(0, 1) == 1:
 					local_y_speed *= -1
-
 		# Make the agents bounce against the screen borders.
 		canvas.move(agent, local_x_speed, local_y_speed)
-
-		(leftPos, topPos, rightPos, bottomPos) = canvas.coords(agent)
+		try:
+			(leftPos, topPos, rightPos, bottomPos) = canvas.coords(agent)
+		except:
+			return
 
 		if leftPos <= 0 or rightPos >= WIDTH:
 			local_x_speed = -local_x_speed
 		if topPos <= 0 or bottomPos >= HEIGHT:
 			local_y_speed = -local_y_speed
+		
+		if SimulationStopSignal:
+			return
 		sleep(frequency)
 	return
 
@@ -190,13 +205,13 @@ def stopSimulation():
 	# Indicate that the simulation is stopping.
 	SimulationStopSignal = True
 
-	# Wait for all threads to stop.
-	sleep(1)
+	# Wait
+	sleep(frequency*5)
 
-	InfectionThreads.clear()
+	# Clear the threads
 	AgentMovementThreads.clear()
-	InfectedZones.clear()
-
+	InfectionThreads.clear()
+	
 	SimulationStopSignal = False
 	return
 
@@ -206,12 +221,15 @@ def clearSimulation():
 	# Delete all the agents from the canvas
 	for agent in Agents:
 		canvas.delete(agent)
+	for agent_infectious_zone in InfectedZones:
+		canvas.delete(agent_infectious_zone)
 
 	# Clear the lists.
 	Agents.clear()
 	SaneAgents.clear()
 	InfectedAgents.clear()
 	ImmuneAgents.clear()
+	InfectedZones.clear()
 	return
 
 def ToggleCentralBehavior():
@@ -232,8 +250,15 @@ else:
 	img = PhotoImage(file='assets/icon.png')
 	root.tk.call('wm', 'iconphoto', root._w, img)
 
+# and theme
+style = ttk.Style(root)
+if "win" in platform:
+	style.theme_use('winnative')
+else:
+	style.theme_use('clam')
+
 # Create frame at the top
-frame = Frame(root)
+frame = ttk.Frame(root)
 frame.pack(side=TOP)
 
 # Create canvas
@@ -241,27 +266,27 @@ canvas = Canvas(frame, width=WIDTH, height=HEIGHT, bg="white")
 canvas.pack(side=RIGHT)
 
 # Add controls to the left of the frame
-controls = Frame(frame)
+controls = ttk.Frame(frame)
 controls.pack(side=LEFT, padx=10)
 
 # Add controls label
-controls_label = Label(controls, text="Controls")
+controls_label = ttk.Label(controls, text="Controls")
 controls_label.pack(pady=10)
 
 # Add button to the left that adds agents
-add_agents_button = Button(controls, text="Add agents", command=lambda: createAgents(10, "Sane"))
+add_agents_button = ttk.Button(controls, text="Add agents", command=lambda: createAgents(10, "Sane"))
 add_agents_button.pack(side=TOP)
 # Add button to the left that adds infected agents
-add_infected_agents_button = Button(controls, text="Add infected agent", command=lambda: createAgent("Infected"))
+add_infected_agents_button = ttk.Button(controls, text="Add infected agent", command=lambda: createAgent("Infected"))
 add_infected_agents_button.pack(side=TOP)
 # Add button to toggle Central Behavior
-central_behavior_button = Button(controls, text="Toggle Central Behavior", command=ToggleCentralBehavior)
+central_behavior_button = ttk.Button(controls, text="Toggle Central Behavior", command=ToggleCentralBehavior)
 central_behavior_button.pack(side=TOP)
 # Add button to stop simulation
-stop_button = Button(controls, text="Stop", command=lambda: stopSimulation())
+stop_button = ttk.Button(controls, text="Stop", command=lambda: stopSimulation())
 stop_button.pack(side=TOP)
 # Add button to clear the canvas
-clear_button = Button(controls, text="Clear", command=lambda: clearSimulation())
+clear_button = ttk.Button(controls, text="Clear", command=lambda: clearSimulation())
 clear_button.pack(side=TOP)
 
 # Variable
@@ -283,7 +308,7 @@ DefaultThreads = []
 # Main thread, since root.mainloop() blocks the program.
 def main():
 	# Add statistics to the right of the window.
-	statistics = Label(root, text="Statistics : Agents = "+str(len(Agents))+" | Sane = "+str(len(SaneAgents))+" | Infected = "+str(len(InfectedAgents))+" | Immune = "+str(len(ImmuneAgents)))
+	statistics = ttk.Label(root, text="Statistics : Agents = "+str(len(Agents))+" | Sane = "+str(len(SaneAgents))+" | Infected = "+str(len(InfectedAgents))+" | Immune = "+str(len(ImmuneAgents)))
 	statistics.pack(side=LEFT)
 
 	# Update statistics
