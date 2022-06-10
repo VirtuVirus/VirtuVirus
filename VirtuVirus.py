@@ -15,24 +15,25 @@ framerate = 24									# Define framerate here. It's the basis for the interval 
 # Agents
 maxXSpeed = maxYSpeed = 96						# Speed of the agents.
 size = 10										# Size of the agents.
-centralBehaviorChance = 0.1						# Chance of the central behavior to be activated per second.
+centralBehaviorChanceRequirement = 0.05						# Chance of the central behavior to be activated per second.
 centralBehaviorRange = 30						# Range of the central area the agents will try to get to.
-doHumanThinking = True							# Agents' actions will depend on the number of infected.
+doHumanBehaviors = True							# Agents' actions will depend on the number of infected.
 
 # Virus
 infective_range = 4								# Range of infection is defined by the size multiplied by this number.
 infectionChance = 0.48							# Chance per second for the agent to be infected.
 defaultRecoveryChance = 0.024					# Chance to recover by default on each second.
 defaultRecoveryChanceProgress = 0.00036			# Progression on each second
+deathRisk = 0.018								# Death risk per second.
 
 # Keep config stable no matter the framerate
 frequency = 1/framerate							# Controls the interval the agents wait before performing their routines (movement, infection, etc...) again. Preferred value is 0.04.
 maxXSpeed = maxYSpeed = maxYSpeed/framerate		# Movement gained per frame.
-centralBehaviorChance /= framerate
+centralBehaviorChanceRequirement /= framerate
 infectionChance /= framerate					# Chance per FRAME for the agent to be infected.
 defaultRecoveryChance /= framerate				# Chance to recover by default on each frame.
 defaultRecoveryChanceProgress /= framerate		# Progression on each frame
-
+deathRisk /= framerate							# Death risk per frame.
 
 # ---------------------------------------------------------- Utilities ----------------------------------------------------------
 def createThread(array, target, args):
@@ -65,12 +66,10 @@ def createAgent(type):
 	Agents.append(agent)
 
 	# We give it movement
-	thread_movement = createThread(AgentMovementThreads, moveAgent, (agent,))
-	AgentMovementThreads.append(thread_movement)
+	createThread(AgentMovementThreads, moveAgent, (agent,))
 
 	if type == "Infected":
-		thread_infectious = createThread(InfectionThreads, infectAgent, (agent,))
-		InfectionThreads.append(thread_infectious)
+		createThread(InfectionThreads, infectAgent, (agent,))
 	elif type == "Immune":
 		ImmunizeAgent(agent)
 	else:
@@ -78,14 +77,38 @@ def createAgent(type):
 	return agent
 
 def ImmunizeAgent(agent):
+	if agent in DeadAgents:
+		return
+	if agent not in ImmuneAgents:
+		ImmuneAgents.append(agent)
+	else:
+		return
+
 	canvas.itemconfig(agent, fill="green")
 
-	ImmuneAgents.append(agent)
+	if agent in InfectedAgents:
+		InfectedAgents.remove(agent)
+	return
+
+def KillAgent(agent):
+	if agent not in DeadAgents:
+		DeadAgents.append(agent)
+	else:
+		return
+
+	canvas.itemconfig(agent, fill="grey")
+	canvas.tag_lower(agent)
+
+	if agent in SaneAgents: #In case of bug
+		SaneAgents.remove(agent)
 	if agent in InfectedAgents:
 		InfectedAgents.remove(agent)
 	return
 
 def infectAgent(agent):
+	if agent in DeadAgents or agent in InfectedAgents:
+		return
+
 	canvas.itemconfig(agent, fill="red")
 
 	# We create the infectious zone and append it.
@@ -96,9 +119,9 @@ def infectAgent(agent):
 	localRecoveryChanceProgress = 0
 
 	# We add the agent to the infected agents.
-	if(agent in SaneAgents):
+	if agent in SaneAgents:
 		SaneAgents.remove(agent)
-	if(agent not in InfectedAgents):
+	if agent not in InfectedAgents:
 		InfectedAgents.append(agent)
 
 	while SimulationStopSignal == False:
@@ -116,9 +139,8 @@ def infectAgent(agent):
 		# Infect overlapping agents
 		overlapping_agents = canvas.find_overlapping(InfectLeftPos, InfectTopPos, InfectRightPos, InfectBottomPos)
 		for overlapping_agent in overlapping_agents:
-			if overlapping_agent != agent and overlapping_agent != agent_infectious_zone and overlapping_agent in SaneAgents and overlapping_agent not in ImmuneAgents:
+			if overlapping_agent != agent and overlapping_agent != agent_infectious_zone and overlapping_agent in SaneAgents:
 				if random() < infectionChance: # Give them a chance to escape unharmed.
-					canvas.itemconfig(overlapping_agent, fill="red")
 					createThread(InfectionThreads, infectAgent, (overlapping_agent,))
 		
 		# Very low chance for the agent to be immunized.
@@ -127,6 +149,12 @@ def infectAgent(agent):
 			canvas.delete(agent_infectious_zone)
 			return
 		localRecoveryChanceProgress += defaultRecoveryChanceProgress
+
+		# Low chance for the agent to die. If Human Behaviors are enabled, the chance gets higher with the number of infected people.
+		if (random() < deathRisk - localRecoveryChanceProgress/4) or (random() < deathRisk * len(InfectedAgents)/(len(SaneAgents)+len(ImmuneAgents)) - localRecoveryChanceProgress/4 and doHumanBehaviors == True):
+			KillAgent(agent)
+			canvas.delete(agent_infectious_zone)
+			return
 
 		if SimulationStopSignal:
 			return
@@ -143,22 +171,22 @@ def moveAgent(agent):
 
 	while SimulationStopSignal == False:
 		# Prevent thread surviving
-		if agent not in Agents or len(AgentMovementThreads) == 0:
+		if agent not in Agents or len(AgentMovementThreads) == 0 or agent in DeadAgents:
 			return
 
 		# Central Behavior
 		if centralBehavior == True:
-			chanceToLaunchCentralBehavior = random()
+			centralBehaviorChance = random()
 
-			if doHumanThinking:
+			if doHumanBehaviors:
 				# If the agent is infected, we make the chance lower.
 				if agent in InfectedAgents:
-					chanceToLaunchCentralBehavior /= 3
+					centralBehaviorChance *= 3
 				# If there are lots of infected, we make the chance lower.
 				if agent in SaneAgents:
-					chanceToLaunchCentralBehavior *= 1 - len(InfectedAgents)/len(Agents)
+					centralBehaviorChance /= (len(Agents) - len(InfectedAgents)+len(DeadAgents)*3)/len(Agents)
 			
-			if chanceToLaunchCentralBehavior >= (1 - centralBehaviorChance):
+			if centralBehaviorChance <= centralBehaviorChanceRequirement:
 				(AgentLeftPos, AgentTopPos, AgentRightPos, AgentBottomPos) = canvas.coords(agent)
 				(CenterX, CenterY) = get2CenterCoordsFrom4Coords(AgentLeftPos, AgentTopPos, AgentRightPos, AgentBottomPos)
 
@@ -173,7 +201,7 @@ def moveAgent(agent):
 					(CenterX, CenterY) = get2CenterCoordsFrom4Coords(AgentLeftPos, AgentTopPos, AgentRightPos, AgentBottomPos)
 					testCordX, testCordY = getCentralCenterCordsFromTopLeftCords(CenterX, CenterY)
 
-					if SimulationStopSignal:
+					if SimulationStopSignal or len(AgentMovementThreads) == 0 or agent in DeadAgents:
 						return
 					sleep(frequency)
 				
@@ -299,6 +327,7 @@ Agents = []
 SaneAgents = []
 ImmuneAgents = []
 InfectedAgents = []
+DeadAgents = []
 InfectedZones = []
 
 AgentMovementThreads = []
@@ -308,13 +337,13 @@ DefaultThreads = []
 # Main thread, since root.mainloop() blocks the program.
 def main():
 	# Add statistics to the right of the window.
-	statistics = ttk.Label(root, text="Statistics : Agents = "+str(len(Agents))+" | Sane = "+str(len(SaneAgents))+" | Infected = "+str(len(InfectedAgents))+" | Immune = "+str(len(ImmuneAgents)))
+	statistics = ttk.Label(root, text="Statistics : Agents = "+str(len(Agents))+" | Sane = "+str(len(SaneAgents))+" | Infected = "+str(len(InfectedAgents))+" | Immune = "+str(len(ImmuneAgents))+" | Dead = "+str(len(DeadAgents)))
 	statistics.pack(side=LEFT)
 
 	# Update statistics
 	while True:
 		sleep(1)
-		statistics.config(text="Statistics : Agents = "+str(len(Agents))+" | Sane = "+str(len(SaneAgents))+" | Infected = "+str(len(InfectedAgents))+" | Immune = "+str(len(ImmuneAgents)))
+		statistics.config(text="Statistics : Agents = "+str(len(Agents))+" | Sane = "+str(len(SaneAgents))+" | Infected = "+str(len(InfectedAgents))+" | Immune = "+str(len(ImmuneAgents))+" | Dead = "+str(len(DeadAgents)))
 MainThread = createThread(DefaultThreads, main, ())
 
 root.mainloop()
