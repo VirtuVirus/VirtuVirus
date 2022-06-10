@@ -18,9 +18,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install pyinstaller
     - name: Package with PyInstaller
-      run: pyinstaller --onefile virtuvirus.py
+      run: pyinstaller --onefile VirtuVirus.py
     - name: Post Packaging Step
-      run: mv dist/virtuvirus virtuvirus
+      run: mv dist/VirtuVirus VirtuVirus
     - name: Extract current branch name
       shell: bash
       run: ref="${GITHUB_REF#refs/heads/}" && echo "::set-output name=branch::${ref////-}"
@@ -30,7 +30,7 @@ jobs:
       with:
         name: virtuvirus-artifacts-linux-${{ steps.ref.outputs.branch }}
         path: |
-          virtuvirus
+          VirtuVirus
           LICENSE
   build_windows:
     runs-on: windows-latest
@@ -47,10 +47,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install pyinstaller
     - name: Package with PyInstaller
-      run: pyinstaller --onefile -F --add-data "assets/icon.ico;assets/icon.ico" --icon="assets/icon.ico" virtuvirus.py
+      run: pyinstaller --onefile -F --add-data "assets/icon.ico;assets/icon.ico" --icon="assets/icon.ico" VirtuVirus.py
     - name: Post Packaging Step
       shell: bash
-      run: mv dist/virtuvirus.exe virtuvirus.exe
+      run: mv dist/VirtuVirus.exe VirtuVirus.exe
     - name: Extract current branch name
       shell: bash
       run: ref="${GITHUB_REF#refs/heads/}" && echo "::set-output name=branch::${ref////-}"
@@ -60,5 +60,5 @@ jobs:
       with:
         name: virtuvirus-artifacts-windows-${{ steps.ref.outputs.branch }}
         path: |
-          virtuvirus.exe
+          VirtuVirus.exe
           LICENSE
