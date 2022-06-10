@@ -47,7 +47,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install pyinstaller
     - name: Package with PyInstaller
-      run: pyinstaller --onefile -F --add-data "assets/icon.ico;assets/icon.ico" virtuvirus.py
+      run: pyinstaller --onefile -F --add-data "assets/icon.ico;assets/icon.ico" --icon="assets/icon.ico" virtuvirus.py
     - name: Post Packaging Step
       shell: bash
       run: mv dist/virtuvirus.exe virtuvirus.exe
