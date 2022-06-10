@@ -253,7 +253,7 @@ else:
 # and theme
 style = ttk.Style(root)
 if "win" in platform:
-	style.theme_use('winnative')
+	style.theme_use('vista')
 else:
 	style.theme_use('clam')
 
