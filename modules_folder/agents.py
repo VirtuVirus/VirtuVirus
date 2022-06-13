@@ -6,7 +6,7 @@ from random import randint, random
 # Internal Imports
 from modules_folder.utilities import createThread, get2CenterCoordsFrom4Coords, getCentralCenterCordsFromTopLeftCords
 from modules_folder.gui_base import canvas
-from modules_folder.global_vars import *
+from modules_folder.global_vars import SimulationStopSignal, cureSignal, Agents, SaneAgents, ImmuneAgents, InfectedAgents, DeadAgents, InfectedZones, AgentMovementThreads, InfectionThreads
 from modules_folder.config_vars import *
 
 def createAgents(quantity, type):
@@ -140,6 +140,7 @@ def moveAgent(agent):
 			return
 
 		# Central Behavior
+		from modules_folder.simulation import centralBehavior #Not the best solution, but that'll do for now.
 		if centralBehavior == True:
 			centralBehaviorChance = random()
 

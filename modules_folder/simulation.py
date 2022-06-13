@@ -3,7 +3,7 @@ from time import sleep
 
 # Internal Imports
 from modules_folder.config_vars import frequency
-from modules_folder.global_vars import Agents, InfectedZones, SaneAgents, InfectedAgents, ImmuneAgents, DeadAgents, AgentMovementThreads, InfectionThreads
+from modules_folder.global_vars import Agents, InfectedZones, SaneAgents, InfectedAgents, ImmuneAgents, DeadAgents, AgentMovementThreads, InfectionThreads, centralBehavior
 from modules_folder.gui_base import canvas
 
 def clearSimulation():
