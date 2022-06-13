@@ -4,7 +4,6 @@ from threading import Thread
 # Internal Imports
 from modules_folder.config_vars import *
 
-# ---------------------------------------------------------- Utilities ----------------------------------------------------------
 def createThread(array, target, args):
 	thread = Thread(target=target, args=args)
 	thread.daemon = True
