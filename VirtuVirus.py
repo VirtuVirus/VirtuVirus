@@ -1,53 +1,16 @@
-# Imports
+# External Imports
 from tkinter import *
 from tkinter import ttk
 from time import sleep
-from threading import Thread
 from random import randint, random
 from sys import platform
 from math import sqrt
 
-# ---------------------------------------------------------- Config ----------------------------------------------------------
-# Simulation config
-WIDTH, HEIGHT = 800, 600						# Size of the window.
-framerate = 24									# Define framerate here. It's the basis for the interval between each frame of the simulation.
-
-# Agents
-maxXSpeed = maxYSpeed = 96						# Speed of the agents.
-size = 10										# Size of the agents.
-centralBehaviorChanceRequirement = 0.05						# Chance of the central behavior to be activated per second.
-centralBehaviorRange = 30						# Range of the central area the agents will try to get to.
-doHumanBehaviors = True							# Agents' actions will depend on the number of infected.
-
-# Virus
-infective_range = 4								# Range of infection is defined by the size multiplied by this number.
-infectionChance = 0.48							# Chance per second for the agent to be infected.
-defaultRecoveryChance = 0.024					# Chance to recover by default on each second.
-defaultRecoveryChanceProgress = 0.00036			# Progression on each second
-deathRisk = 0.018								# Death risk per second.
-
-# Keep config stable no matter the framerate
-frequency = 1/framerate							# Controls the interval the agents wait before performing their routines (movement, infection, etc...) again. Preferred value is 0.04.
-maxXSpeed = maxYSpeed = maxYSpeed/framerate		# Movement gained per frame.
-centralBehaviorChanceRequirement /= framerate
-infectionChance /= framerate					# Chance per FRAME for the agent to be infected.
-defaultRecoveryChance /= framerate				# Chance to recover by default on each frame.
-defaultRecoveryChanceProgress /= framerate		# Progression on each frame
-deathRisk /= framerate							# Death risk per frame.
-
-# ---------------------------------------------------------- Utilities ----------------------------------------------------------
-def createThread(array, target, args):
-	thread = Thread(target=target, args=args)
-	thread.daemon = True
-	thread.start()
-	array.append(thread)
-	return thread
-
-def get2CenterCoordsFrom4Coords(leftPos, topPos, rightPos, bottomPos):
-	return ((leftPos+rightPos)/2, (topPos+bottomPos)/2)
-
-def getCentralCenterCordsFromTopLeftCords(CenterX, CenterY):
-	return (CenterX - WIDTH/2, CenterY - HEIGHT/2)
+# Internal Imports from modules folder
+from modules_folder.simulation import *
+from modules_folder.utilities import *
+from modules_folder.config_vars import *
+from modules_folder.global_vars import *
 
 # -------------------------------------------------------- Agents Functions ------------------------------------------------------
 def createAgents(quantity, type):
@@ -197,7 +160,10 @@ def moveAgent(agent):
 					local_x_speed, local_y_speed = (WIDTH/2 - CenterX)/framerate, (HEIGHT/2 - CenterY)/framerate
 					canvas.move(agent, local_x_speed, local_y_speed)
 
-					(AgentLeftPos, AgentTopPos, AgentRightPos, AgentBottomPos) = canvas.coords(agent)
+					try:
+						(AgentLeftPos, AgentTopPos, AgentRightPos, AgentBottomPos) = canvas.coords(agent)
+					except:
+						return
 					(CenterX, CenterY) = get2CenterCoordsFrom4Coords(AgentLeftPos, AgentTopPos, AgentRightPos, AgentBottomPos)
 					testCordX, testCordY = getCentralCenterCordsFromTopLeftCords(CenterX, CenterY)
 
@@ -228,21 +194,6 @@ def moveAgent(agent):
 		sleep(frequency)
 	return
 
-def stopSimulation():
-	global SimulationStopSignal
-	# Indicate that the simulation is stopping.
-	SimulationStopSignal = True
-
-	# Wait
-	sleep(frequency*5)
-
-	# Clear the threads
-	AgentMovementThreads.clear()
-	InfectionThreads.clear()
-	
-	SimulationStopSignal = False
-	return
-
 def clearSimulation():
 	stopSimulation()
 
@@ -260,12 +211,6 @@ def clearSimulation():
 	InfectedZones.clear()
 	return
 
-def ToggleCentralBehavior():
-	global centralBehavior
-	centralBehavior = not centralBehavior
-	return
-
-# ---------------------------------------------------------- Program ----------------------------------------------------------
 root = Tk()
 root.title("VirtuVirus")
 root.iconname("VirtuVirus")
@@ -316,23 +261,6 @@ stop_button.pack(side=TOP)
 # Add button to clear the canvas
 clear_button = ttk.Button(controls, text="Clear", command=lambda: clearSimulation())
 clear_button.pack(side=TOP)
-
-# Variable
-centralBehavior = True
-SimulationStopSignal = False
-cureSignal = False
-
-# We configure the lists.
-Agents = []
-SaneAgents = []
-ImmuneAgents = []
-InfectedAgents = []
-DeadAgents = []
-InfectedZones = []
-
-AgentMovementThreads = []
-InfectionThreads = []
-DefaultThreads = []
 
 # Main thread, since root.mainloop() blocks the program.
 def main():
