@@ -1,7 +1,10 @@
 # ---------------------------------------------------------- Config ----------------------------------------------------------
-# Simulation config
+# Window size
 WIDTH, HEIGHT = 800, 600						# Size of the window.
+
+# Simulation config
 framerate = 24									# Define framerate here. It's the basis for the interval between each frame of the simulation.
+canvasQuantity = 4							# Number of canvases in the simulation.
 
 # Agents
 maxXSpeed = maxYSpeed = 96						# Speed of the agents.
