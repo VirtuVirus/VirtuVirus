@@ -120,8 +120,8 @@ def infectAgent(agent):
 				return
 		except:
 			return
-
-		if SimulationStopSignal:
+		
+		if SimulationStopSignal or len(InfectionThreads) == 0:
 			return
 		sleep(frequency * 0.8)
 	return
