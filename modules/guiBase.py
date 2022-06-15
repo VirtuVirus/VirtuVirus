@@ -40,8 +40,8 @@ def defineGUI():
 	canvasZone = guiUtils.createFrame(topZone, tk.RIGHT, fill="both", expand=True)
 
 	# Insert an empty placeholder in the zone for the canvass
-	placeholderCanvas = tk.Canvas(canvasZone, bg="grey")
-	placeholderCanvas.pack(fill="both", expand=True)
+	backgroundCanvas = tk.Canvas(canvasZone, bg="grey")
+	backgroundCanvas.pack(fill="both", expand=True)
 
 	# On the left of the zone for canvass, add zones for control of the simulation and the agents and the settings
 	controlZone = guiUtils.createFrame(topZone, tk.LEFT)
@@ -94,4 +94,4 @@ def defineGUI():
 	timeLabel = ttk.Label(statusZone, text="Time has not been initiated.", padding=(0, 0, 5, 0))
 	timeLabel.pack(side=tk.RIGHT)
 
-	return {"window_root": root}
+	return {"window_root": root, "simulation_zone": backgroundCanvas}
