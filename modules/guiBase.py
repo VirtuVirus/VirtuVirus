@@ -69,13 +69,13 @@ def defineGUI():
 
 	# Create start, stop and pause buttons with icons
 	StartAndStopZone = guiUtils.createFrame(simulationControlZone, tk.TOP)
-	StartSimulationButton = guiUtils.createButton(StartAndStopZone, tk.LEFT, "Start", "pass", None, padding=(2, 2, 2, 2))
-	StopSimulationButton = guiUtils.createButton(StartAndStopZone, tk.RIGHT, "Stop", "pass", None, padding=(2, 2, 2, 2))
+	StartSimulationButton = ttk.Button(StartAndStopZone, text="Start", padding=(2, 2, 2, 2)).pack(side=tk.LEFT)
+	StopSimulationButton = ttk.Button(StartAndStopZone, text="Stop", padding=(2, 2, 2, 2), state=tk.DISABLED).pack(side=tk.RIGHT)
+	PauseSimulationButton = ttk.Button(simulationControlZone, text="Pause Simulation", padding=(2, 2, 2, 2), state=tk.DISABLED).pack(side=tk.TOP)
+	
+	OpenSettingsButton = ttk.Button(simulationControlZone, text="Modify Settings", padding=(2, 2, 2, 2), command=lambda: defineSettingsDialogBox(root)).pack(side=tk.TOP)
+	ShowCurrentGraph = ttk.Button(simulationControlZone, text="Show Graph", padding=(2, 2, 2, 2), state=tk.DISABLED).pack(side=tk.TOP)
 
-	PauseSimulationButton = guiUtils.createButton(simulationControlZone, tk.TOP, "Pause Simulation", "pass", None)
-
-	OpenSettingsButton = guiUtils.createButton(simulationControlZone, tk.TOP, "Modify Settings", "pass", None)
-	ShowCurrentGraph = guiUtils.createButton(simulationControlZone, tk.TOP, "Show Graph", "pass", None)
 
 	# Create the zone for the control of the agents
 	ttk.Label(agentsControlZone, text="Agents", padding=(5, 5, 5, 5), font=("Helvetica", 10, "bold")).pack(side=tk.TOP)
@@ -95,3 +95,22 @@ def defineGUI():
 	timeLabel.pack(side=tk.RIGHT)
 
 	return {"window_root": root, "simulation_zone": backgroundCanvas}
+
+def defineSettingsDialogBox(window_root):
+	settingsDialogBox = tk.Toplevel()
+	settingsDialogBox.title("Simulation Setup")
+	settingsDialogBox.iconname("Simulation Setup")
+	settingsDialogBox.minsize(700, 500)
+	settingsDialogBox.resizable(False, False)
+	settingsDialogBox.wm_iconname("Simulation Setup")
+
+	# Lock main window
+	settingsDialogBox.grab_set()
+	settingsDialogBox.wm_transient(window_root)
+
+	# Set icon
+	if "win" in platform:
+		settingsDialogBox.wm_iconbitmap(default="assets/icon.ico")
+	else:
+		img = tk.PhotoImage(file='assets/icon.png')
+		settingsDialogBox.tk.call('wm', 'iconphoto', settingsDialogBox._w, img)
