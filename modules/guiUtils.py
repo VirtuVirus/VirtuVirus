@@ -30,11 +30,11 @@ def generateCanvass(CanvasRoot, number, width, height, windowRoot, hasInfectiveC
 		
 		canvasses.append({"simulationZone": canvas, "agents": [], "saneAgents": [], "infectedAgents": [], "immuneAgents": [], "deadAgents": [], "connectedThreads": [], "isInfectiveContainer": False})
 	
-	if hasInfectiveContainer:
+	if hasInfectiveContainer and number > 1:
 		canvas.config(highlightthickness=2, highlightbackground="red")
 		canvasses[-1]["isInfectiveContainer"] = True
 		
 	# Adapt minimal resolution of windowRoot
-	windowRoot.minsize(int(width*5+200), max(int(height*j+55), configVars.HEIGHT))
+	windowRoot.minsize(int(width*min(5, number)+200), max(int(height*j+55), configVars.HEIGHT))
 	
 	return canvasses
