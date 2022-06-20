@@ -3,7 +3,7 @@ import tkinter as tk
 import tkinter.ttk as ttk
 
 # Internal Imports
-from modules import configVars
+from modules import defaultConfigVars
 
 def createFrame(root, location, padding = (0, 0, 0, 0), fill = None, expand = None, anchor = None, ipadx = None, ipady = None):
 	frame = ttk.Frame(root, padding=padding)
@@ -35,6 +35,6 @@ def generateCanvass(CanvasRoot, number, width, height, windowRoot, hasInfectiveC
 		canvasses[-1]["isInfectiveContainer"] = True
 		
 	# Adapt minimal resolution of windowRoot
-	windowRoot.minsize(int(width*min(5, number)+200), max(int(height*j+55), configVars.HEIGHT))
+	windowRoot.minsize(int(width*min(5, number)+200), max(int(height*j+55), defaultConfigVars.HEIGHT))
 	
 	return canvasses

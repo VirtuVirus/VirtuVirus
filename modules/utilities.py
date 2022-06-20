@@ -2,7 +2,7 @@
 from threading import Thread
 
 # Internal Imports
-from modules import configVars
+from modules import defaultConfigVars
 
 def createThread(ThreadManagementArray, function, arguments=()):
 	thread = Thread(target=function, args=arguments)
@@ -15,4 +15,4 @@ def get2CenterCoordsFrom4Coords(leftPos, topPos, rightPos, bottomPos):
 	return ((leftPos+rightPos)/2, (topPos+bottomPos)/2)
 
 def getCentralCenterCordsFromTopLeftCords(CenterX, CenterY):
-	return (CenterX - configVars.WIDTH/2, CenterY - configVars.HEIGHT/2)
+	return (CenterX - defaultConfigVars.WIDTH/2, CenterY - defaultConfigVars.HEIGHT/2)
