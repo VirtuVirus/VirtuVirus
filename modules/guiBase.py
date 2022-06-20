@@ -9,19 +9,20 @@ from PIL import Image, ImageTk
 # Internal Imports
 from modules import defaultConfigVars
 from modules import guiUtils
+from modules import utilities
 
-# Global variables
-exampleCanvas = None
+# TEMPORARY
+globalVars = {}
 
 def defineGUI():
-	global logo
+	global logo, backgroundCanvas
 
 	root = tk.Tk()
 	root.title("VirtuVirus")
 	root.iconname("VirtuVirus")
 	root.minsize(defaultConfigVars.WIDTH, defaultConfigVars.HEIGHT)
 	root.wm_iconname("VirtuVirus")
-
+	root.wm_title("VirtuVirus")
 
 	# Set icon
 	if "win" in platform:
@@ -74,12 +75,20 @@ def defineGUI():
 	# Create start, stop and pause buttons with icons
 	StartAndStopZone = guiUtils.createFrame(simulationControlZone, tk.TOP)
 	StartSimulationButton = ttk.Button(StartAndStopZone, text="Start", padding=(2, 2, 2, 2)).pack(side=tk.LEFT)
-	StopSimulationButton = ttk.Button(StartAndStopZone, text="Stop", padding=(2, 2, 2, 2), state=tk.DISABLED).pack(side=tk.RIGHT)
-	PauseSimulationButton = ttk.Button(simulationControlZone, text="Pause Simulation", padding=(2, 2, 2, 2), state=tk.DISABLED).pack(side=tk.TOP)
+	StopSimulationButton = ttk.Button(StartAndStopZone, text="Stop", padding=(2, 2, 2, 2), state=tk.DISABLED)
+	StopSimulationButton.pack(side=tk.RIGHT)
+	PauseSimulationButton = ttk.Button(simulationControlZone, text="Pause Simulation", padding=(2, 2, 2, 2), state=tk.DISABLED)
+	PauseSimulationButton.pack(side=tk.TOP)
+	ClearSimulationButton = ttk.Button(simulationControlZone, text="Clear Simulation", command=lambda: clearSimulations(backgroundCanvas, root, [StopSimulationButton, PauseSimulationButton, ClearSimulationButton, ShowCurrentGraph]), padding=(2, 2, 2, 2), state=tk.DISABLED)
+	ClearSimulationButton.pack(side=tk.TOP)
 	
-	OpenSettingsButton = ttk.Button(simulationControlZone, text="Modify Settings", padding=(2, 2, 2, 2), command=lambda: defineSettingsDialogBox(root)).pack(side=tk.TOP)
-	ShowCurrentGraph = ttk.Button(simulationControlZone, text="Show Graph", padding=(2, 2, 2, 2), state=tk.DISABLED).pack(side=tk.TOP)
+	OpenSettingsButton = ttk.Button(simulationControlZone, text="Modify Settings", padding=(2, 2, 2, 2), command=lambda: defineSettingsDialogBox(root))
+	OpenSettingsButton.pack(side=tk.TOP)
+	ShowCurrentGraph = ttk.Button(simulationControlZone, text="Show Graph", padding=(2, 2, 2, 2), state=tk.DISABLED)
+	ShowCurrentGraph.pack(side=tk.TOP)
 
+	# TEMPORARY
+	globalVars["limitedButtons"] = [StopSimulationButton, PauseSimulationButton, ClearSimulationButton, ShowCurrentGraph]
 
 	# Create the zone for the control of the agents
 	ttk.Label(agentsControlZone, text="Agents", padding=(5, 5, 5, 5), font=("Helvetica", 10, "bold")).pack(side=tk.TOP)
@@ -243,13 +252,13 @@ def defineSettingsDialogBox(window_root):
 		config["framerate"] = int(framerateEntry.get())
 		config["canvasWidth"] = int(sizeEntryWidth.get())
 		config["canvasHeight"] = int(sizeEntryHeight.get())
-		config["isLastSimulationQuarantine"] = makeLastSimulationQuantineCheckbox.state()[0] == "selected"
+		config["isLastSimulationQuarantine"] = utilities.isChecked(makeLastSimulationQuantineCheckbox)
 		config["maximumAgentSpeed"] = int(maximumSpeedEntry.get())
 		config["agentSize"] = int(agentSizeEntry.get())
-		config["enableCentralTravel"] = enableCentralTravelCheckbox.state()[0] == "selected"
+		config["enableCentralTravel"] = utilities.isChecked(enableCentralTravelCheckbox.state)
 		config["centralTravelChance"] = int(centralBehaviorChanceEntry.get())
 		config["centerRange"] = int(centerRangeEntry.get())
-		config["enableHumanLogic"] = enableHumanLogicCheckbox.state()[0] == "selected"
+		config["enableHumanLogic"] = utilities.isChecked(enableHumanLogicCheckbox)
 		config["infectiveRange"] = int(infectiveRangeEntry.get())
 		config["infectionRisk"] = int(infectionChanceEntry.get())
 		config["defaultRecoveryChance"] = int(defaultRecoveryChanceEntry.get())
@@ -285,8 +294,23 @@ def defineSettingsDialogBox(window_root):
 	
 	# Bottom frame
 	bottomFrame = guiUtils.createFrame(mainSettingsFrame, tk.BOTTOM, padding=(5, 5, 5, 5))
-	ttk.Button(bottomFrame, text="Start", padding=(2, 2, 2, 2)).pack(side=tk.LEFT)
+	ttk.Button(bottomFrame, text="Apply", command=lambda: spawnSimulations(window_root, generateConfigFromEntries()), padding=(2, 2, 2, 2)).pack(side=tk.LEFT)
 	ttk.Button(bottomFrame, text="Preview", command=lambda: spawnExampleCanvas(settingsDialogBox, generateConfigFromEntries()), padding=(2, 2, 2, 2)).pack(side=tk.RIGHT)
+
+def spawnSimulations(window_root, settings):
+	guiUtils.clearCanvassesVisual(backgroundCanvas, window_root)
+	guiUtils.generateCanvasses(backgroundCanvas, settings["simulationQuantity"], settings["canvasWidth"], settings["canvasHeight"], window_root, settings["isLastSimulationQuarantine"])
+
+	# Enable all disabled buttons
+	for button in globalVars["limitedButtons"]:
+		button.config(state=tk.NORMAL)
+
+def clearSimulations(canvasLocation, window_root, buttons):
+	guiUtils.clearCanvassesVisual(canvasLocation, window_root)
+
+	# Disable all buttons
+	for button in buttons:
+		button.config(state=tk.DISABLED)
 
 def spawnExampleCanvas(root, settings):
 	pass

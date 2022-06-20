@@ -16,3 +16,9 @@ def get2CenterCoordsFrom4Coords(leftPos, topPos, rightPos, bottomPos):
 
 def getCentralCenterCordsFromTopLeftCords(CenterX, CenterY):
 	return (CenterX - defaultConfigVars.WIDTH/2, CenterY - defaultConfigVars.HEIGHT/2)
+
+def isChecked(checkbox):
+	try:
+		return checkbox.state()[0] == "selected" 
+	except: 
+		return False

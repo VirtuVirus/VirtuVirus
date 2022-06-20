@@ -14,7 +14,7 @@ def testProcedure(Type):
 	sleep(2)
 	print("Testing procedure process started for " + Type)
 	if Type == "canvasses":
-		guiUtils.generateCanvass(GraphicalComponents["simulation_zone"], 15, 300, 300, GraphicalComponents["window_root"], True)
+		guiUtils.generateCanvasses(GraphicalComponents["simulation_zone"], 15, 300, 300, GraphicalComponents["window_root"], True)
 	else:
 		print("Unknown test. Ignoring...")
 #utilities.createThread(TestThreads, testProcedure, ("canvasses",))

@@ -10,7 +10,7 @@ def createFrame(root, location, padding = (0, 0, 0, 0), fill = None, expand = No
 	frame.pack(side=location, fill = fill, expand = expand, anchor = anchor, ipadx = ipadx, ipady = ipady)
 	return frame
 
-def generateCanvass(CanvasRoot, number, width, height, windowRoot, hasInfectiveContainer = False):
+def generateCanvasses(CanvasRoot, number, width, height, windowRoot, hasInfectiveContainer = False):
 	canvasses = []
 	i = 0
 	j = 0
@@ -38,3 +38,13 @@ def generateCanvass(CanvasRoot, number, width, height, windowRoot, hasInfectiveC
 	windowRoot.minsize(int(width*min(5, number)+200), max(int(height*j+55), defaultConfigVars.HEIGHT))
 	
 	return canvasses
+
+def clearCanvassesVisual(Canvas_root, windowRoot):
+	for canvas in Canvas_root.grid_slaves():
+		canvas.destroy()
+
+	# Change canvas_root size back to zero
+	Canvas_root.config(width=0, height=0)
+
+	
+	windowRoot.minsize(defaultConfigVars.WIDTH, defaultConfigVars.HEIGHT)
