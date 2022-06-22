@@ -16,26 +16,20 @@ Made by [JordanViknar](https://github.com/JordanViknar) and [Charx19](https://gi
 
 ## How to download ?
 
-As of currently, there are no official releases of VirtuVirus. The current way to get VirtuVirus is to either run it from source, or to grab the latest executable from the Actions tab.
+As of now, there are no official releases of VirtuVirus. The current way to get VirtuVirus is to either run it from source, or to grab the latest executable from the Actions tab.
 Currently, the executables provided are for Windows and Linux.
 
 In the event you cannot/don't want to use them, it is possible to manually run the Python code straight from source.
 
 ## Requirements (when using source)
-- *Python 3.4 or above*
+- *A recent version of Python 3*
 - *Tkinter (with the Ttk module)*
 
 All other dependencies should be already bundled with Python.
 
 ## How do I use it ?
 
-It is quite simple. Upon starting the program, you'll notice the presence of a blank canvas with some controls on the right.
-Here's the description of what each button does :
-- **Add agents** : This button will add 10 sane agents to the canvas. They will roam around, bounce off the borders, and occasionally rush to the center.
-- **Add infected agent** : This button wil add a single infected agent to the canvas. 
-- **Toggle Central Behavior** : This button will enable or disable the occasional "center rush" movement of the agents. That movement is meant to be a reproduction of people reuniting in different places, such as a school, a restaurant, a theater, etc.
-- **Stop** : The simulation is (almost) immediately stopped. There is currently no way to resume it.
-- **Clear** : The simulation is reset to zero and the canvas is cleaned off any agent.
+*[Placeholder]*
 
 As of now, the current types of agents are :
 - 🔵 **Sane** : This agent has yet to be infected. It possesses no resistance to the infection, and will rush less often to the center the more infected agents there are.
