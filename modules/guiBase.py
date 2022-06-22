@@ -11,6 +11,7 @@ from modules import defaultConfigVars
 from modules import guiUtils
 from modules import utilities
 from modules import sharedData
+from modules import agents
 
 def defineGUI():
 	root = tk.Tk()
@@ -87,19 +88,23 @@ def defineGUI():
 	ttk.Label(agentsControlZone, text="Agents", padding=(5, 5, 5, 5), font=("Helvetica", 10, "bold")).pack(side=tk.TOP)
 	# Have count for each type of agent
 	AgentCountZone = guiUtils.createFrame(agentsControlZone, tk.LEFT)
-	SaneCountLabel = ttk.Label(AgentCountZone, text="Sane : 0").pack(side=tk.TOP)
-	InfectedCountLabel = ttk.Label(AgentCountZone, text="Infected : 0").pack(side=tk.TOP)
-	ImmuneCountLabel = ttk.Label(AgentCountZone, text="Immune : 0").pack(side=tk.TOP)
-	DeadCountLabel = ttk.Label(AgentCountZone, text="Dead : 0").pack(side=tk.TOP)
+	SaneCountLabel = ttk.Label(AgentCountZone, text="Sane : 0")
+	SaneCountLabel.pack(side=tk.TOP)
+	InfectedCountLabel = ttk.Label(AgentCountZone, text="Infected : 0")
+	InfectedCountLabel.pack(side=tk.TOP)
+	ImmuneCountLabel = ttk.Label(AgentCountZone, text="Immune : 0")
+	ImmuneCountLabel.pack(side=tk.TOP)
+	DeadCountLabel = ttk.Label(AgentCountZone, text="Dead : 0")
+	DeadCountLabel.pack(side=tk.TOP)
 
 	# Create area for status on the bottom
 	statusZone = guiUtils.createFrame(root, tk.BOTTOM, padding=(5, 5, 5, 5), fill="x")
-	statusLabel = ttk.Label(statusZone, text="No simulation is currently running.", padding=(10, 0, 0, 0))
+	statusLabel = ttk.Label(statusZone, text="No simulation has been spawned.", padding=(10, 0, 0, 0))
 	statusLabel.pack(side=tk.LEFT)
 	timeLabel = ttk.Label(statusZone, text="Time has not been initiated.", padding=(0, 0, 5, 0))
 	timeLabel.pack(side=tk.RIGHT)
 
-	return {"mainWindowRoot": root, "simulationZone": backgroundCanvas, "interactiveButtons": {"startButton": StartSimulationButton, "stopButton": StopSimulationButton, "pauseButton": PauseSimulationButton, "clearButton": ClearSimulationButton, "showGraphButton": ShowCurrentGraph, "openSettingsButton": OpenSettingsButton}}
+	return {"mainWindowRoot": root, "simulationZone": backgroundCanvas, "interactiveButtons": {"startButton": StartSimulationButton, "stopButton": StopSimulationButton, "pauseButton": PauseSimulationButton, "clearButton": ClearSimulationButton, "showGraphButton": ShowCurrentGraph, "openSettingsButton": OpenSettingsButton}, "counters":{"saneCount": SaneCountLabel, "infectedCount": InfectedCountLabel, "immuneCount": ImmuneCountLabel, "deadCount": DeadCountLabel}, "statusLabel": statusLabel, "timeLabel": timeLabel}
 
 def defineSettingsDialogBox(window_root):
 	settingsDialogBox = tk.Toplevel()
@@ -161,17 +166,23 @@ def defineSettingsDialogBox(window_root):
 	ttk.Label(mainSettingsFrame, text="Agents", padding=(5, 5, 5, 5), font=("Helvetica", 10, "bold")).pack(side=tk.TOP)
 	agentSettingsFrame = guiUtils.createFrame(mainSettingsFrame, tk.TOP, padding=(5, 5, 5, 5), ipady=10, anchor = tk.W)
 
-	numberOfAgentsFrame = guiUtils.createFrame(agentSettingsFrame, tk.TOP, anchor = tk.W)
-	ttk.Label(numberOfAgentsFrame, text="Agents per simulation : ", padding=(5, 5, 5, 5)).pack(side=tk.LEFT)
-	agentCountEntry = ttk.Entry(numberOfAgentsFrame, width=4)
-	agentCountEntry.pack(side=tk.RIGHT)
-	agentCountEntry.insert(0, "100")
+	numberOfSaneAgentsFrame = guiUtils.createFrame(agentSettingsFrame, tk.TOP, anchor = tk.W)
+	ttk.Label(numberOfSaneAgentsFrame, text="Sane agents per simulation : ", padding=(5, 5, 5, 5)).pack(side=tk.LEFT)
+	saneAgentCountEntry = ttk.Entry(numberOfSaneAgentsFrame, width=4)
+	saneAgentCountEntry.pack(side=tk.RIGHT)
+	saneAgentCountEntry.insert(0, "99")
 
 	numberOfInfectedAgentsFrame = guiUtils.createFrame(agentSettingsFrame, tk.TOP, anchor = tk.W)
 	ttk.Label(numberOfInfectedAgentsFrame, text="Infected agents per simulation : ", padding=(5, 5, 5, 5)).pack(side=tk.LEFT)
 	infectedAgentCountEntry = ttk.Entry(numberOfInfectedAgentsFrame, width=3)
 	infectedAgentCountEntry.pack(side=tk.RIGHT)
 	infectedAgentCountEntry.insert(0, "1")
+
+	numberOfImmuneAgentsFrame = guiUtils.createFrame(agentSettingsFrame, tk.TOP, anchor = tk.W)
+	ttk.Label(numberOfImmuneAgentsFrame, text="Immune agents per simulation : ", padding=(5, 5, 5, 5)).pack(side=tk.LEFT)
+	immuneAgentCountEntry = ttk.Entry(numberOfImmuneAgentsFrame, width=3)
+	immuneAgentCountEntry.pack(side=tk.RIGHT)
+	immuneAgentCountEntry.insert(0, "0")
 
 	maximumSpeedFrame = guiUtils.createFrame(agentSettingsFrame, tk.TOP, anchor = tk.W)
 	ttk.Label(maximumSpeedFrame, text="Maximum agent speed (pixels/s) : ", padding=(5, 5, 5, 5)).pack(side=tk.LEFT)
@@ -257,8 +268,9 @@ def defineSettingsDialogBox(window_root):
 		config["canvasWidth"] = int(sizeEntryWidth.get())
 		config["canvasHeight"] = int(sizeEntryHeight.get())
 		config["isLastSimulationQuarantine"] = utilities.isChecked(makeLastSimulationQuantineCheckbox)
-		config["numberOfAgents"] = int(agentCountEntry.get())
+		config["numberOfSaneAgents"] = int(saneAgentCountEntry.get())
 		config["numberOfInfectedAgents"] = int(infectedAgentCountEntry.get())
+		config["numberOfImmuneAgents"] = int(immuneAgentCountEntry.get())
 		config["maximumAgentSpeed"] = int(maximumSpeedEntry.get())
 		config["agentSize"] = int(agentSizeEntry.get())
 		config["enableCentralTravel"] = utilities.isChecked(enableCentralTravelCheckbox.state)
@@ -280,8 +292,9 @@ def defineSettingsDialogBox(window_root):
 		config["defaultRecoveryChance"] = min(max(config["defaultRecoveryChance"], 0), 100)
 		config["recoveryChanceProgress"] = min(max(config["recoveryChanceProgress"], 0), 100)
 		config["deathRisk"] = min(max(config["deathRisk"], 0), 100)
-		config["numberOfAgents"] = max(config["numberOfAgents"], 1)
-		config["numberOfInfectedAgents"] = min(max(config["numberOfInfectedAgents"], 0), config["numberOfAgents"])
+		config["numberOfSaneAgents"] = max(config["numberOfSaneAgents"], 1)
+		config["numberOfInfectedAgents"] = max(config["numberOfInfectedAgents"], 0)
+		config["numberOfImmuneAgents"] = max(config["numberOfImmuneAgents"], 0)
 
 		# We apply the necessary tweaks
 		config["centralTravelChance"] = config["centralTravelChance"] / 100
@@ -303,6 +316,9 @@ def defineSettingsDialogBox(window_root):
 
 		# Close the window
 		settingsDialogBox.destroy()
+
+		# Print a message
+		print("Settings applied.")
 		
 		return config
 	
@@ -313,7 +329,19 @@ def defineSettingsDialogBox(window_root):
 
 def spawnSimulations(settings):
 	guiUtils.clearCanvasses(sharedData.getGlobalVar("interactiveGraphicalComponents")["simulationZone"], sharedData.getGlobalVar("interactiveGraphicalComponents")["mainWindowRoot"])
+
 	guiUtils.generateCanvasses(sharedData.getGlobalVar("interactiveGraphicalComponents")["simulationZone"], settings["simulationQuantity"], settings["canvasWidth"], settings["canvasHeight"], sharedData.getGlobalVar("interactiveGraphicalComponents")["mainWindowRoot"], settings["isLastSimulationQuarantine"])
+	agents.createAgents(sharedData.getGlobalVar("simulations"), sharedData.getVarInConfig("numberOfSaneAgents"), sharedData.getVarInConfig("numberOfInfectedAgents"), sharedData.getVarInConfig("numberOfImmuneAgents"))
+
+	# Update all counts (we're right at the start of the simulation, so this method is acceptable)
+	numberOfSaneAgents = sharedData.getVarInConfig("numberOfSaneAgents")*settings["simulationQuantity"]
+	numberOfInfectedAgents = sharedData.getVarInConfig("numberOfInfectedAgents")*settings["simulationQuantity"]
+	numberOfImmuneAgents = sharedData.getVarInConfig("numberOfImmuneAgents")*settings["simulationQuantity"]
+	guiUtils.updateCounts(numberOfSaneAgents, numberOfInfectedAgents, numberOfImmuneAgents, 0)
+
+	# And we indicate that the simulation is ready, but not started.
+	sharedData.getGlobalVar("interactiveGraphicalComponents")["statusLabel"].config(text="The simulations are ready, but not started.")
+
 
 def clearSimulations():
 	guiUtils.clearCanvasses(sharedData.getGlobalVar("interactiveGraphicalComponents")["simulationZone"], sharedData.getGlobalVar("interactiveGraphicalComponents")["mainWindowRoot"])
@@ -323,6 +351,9 @@ def clearSimulations():
 	buttons["pauseButton"].config(state=tk.DISABLED)
 	buttons["stopButton"].config(state=tk.DISABLED)
 	buttons["showGraphButton"].config(state=tk.DISABLED)
+
+	# We reset the status label to its original message
+	sharedData.getGlobalVar("interactiveGraphicalComponents")["statusLabel"].config(text="No simulation has been spawned.")
 
 def spawnExampleCanvas(root, settings):
 	pass

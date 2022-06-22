@@ -38,7 +38,7 @@ def generateCanvasses(CanvasRoot, number, width, height, windowRoot, hasInfectiv
 	# Adapt minimal resolution of windowRoot
 	windowRoot.minsize(int(width*min(5, number)+200), max(int(height*j+55), defaultConfigVars.HEIGHT))
 
-	sharedData.writeGlobalVar("canvasses", canvasses)
+	sharedData.writeGlobalVar("simulations", canvasses)
 	
 	return canvasses
 
@@ -50,6 +50,15 @@ def clearCanvasses(canvasRoot, windowRoot):
 	canvasRoot.config(width=0, height=0)
 
 	# We empty all the canvasses from the shared data.
-	sharedData.writeGlobalVar("canvasses", None)
+	sharedData.writeGlobalVar("simulations", None)
+
+	# We reset the counts
+	updateCounts(0,0,0,0)
 	
 	windowRoot.minsize(defaultConfigVars.WIDTH, defaultConfigVars.HEIGHT)
+
+def updateCounts(numberOfSaneAgents, numberOfInfectedAgents, numberOfImmuneAgents, numberOfDeadAgents):
+	sharedData.getGlobalVar("interactiveGraphicalComponents")["counters"]["saneCount"].config(text="Sane : "+str(numberOfSaneAgents))
+	sharedData.getGlobalVar("interactiveGraphicalComponents")["counters"]["infectedCount"].config(text="Infected : "+str(numberOfInfectedAgents))
+	sharedData.getGlobalVar("interactiveGraphicalComponents")["counters"]["immuneCount"].config(text="Immune : "+str(numberOfImmuneAgents))
+	sharedData.getGlobalVar("interactiveGraphicalComponents")["counters"]["deadCount"].config(text="Dead : "+str(numberOfDeadAgents))

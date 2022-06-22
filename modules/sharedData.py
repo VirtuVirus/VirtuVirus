@@ -17,6 +17,10 @@ def getCurrentConfig():
 	global config
 	return config
 
+def getVarInConfig(varName):
+	global config
+	return config[varName]
+
 # ----------------------------------------- Global Variables ----------------------------------------- #
 globalVars = {}
 
