@@ -12,6 +12,8 @@ config["canvasHeight"] = 300							# Number of canvases in the simulation.
 config["isLastSimulationQuarantine"] = True
 
 # Agents
+config["numberOfAgents"] = 100							# Number of agents in the simulation.
+config["numberOfInfectedAgents"] = 1						# Number of infected agents in the simulation.
 config["maximumAgentSpeed"] =  96						# Speed of the agents.
 config["agentSize"] = 10										# Size of the agents.
 config["enableCentralTravel"] = True

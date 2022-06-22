@@ -152,7 +152,7 @@ def defineSettingsDialogBox(window_root):
 	sizeEntryHeight.insert(0, "300")
 
 	makeLastSimulationQuantineFrame = guiUtils.createFrame(simulationSettingsFrame, tk.TOP, anchor = tk.W)
-	ttk.Label(makeLastSimulationQuantineFrame, text="Make last simulation quantine : ", padding=(5, 5, 5, 5)).pack(side=tk.LEFT)
+	ttk.Label(makeLastSimulationQuantineFrame, text="Make last simulation quarantine : ", padding=(5, 5, 5, 5)).pack(side=tk.LEFT)
 	makeLastSimulationQuantineCheckbox = ttk.Checkbutton(makeLastSimulationQuantineFrame, variable=tk.IntVar())
 	makeLastSimulationQuantineCheckbox.pack(side=tk.RIGHT)
 	makeLastSimulationQuantineCheckbox.state(["selected"])
@@ -160,6 +160,18 @@ def defineSettingsDialogBox(window_root):
 	# Agents
 	ttk.Label(mainSettingsFrame, text="Agents", padding=(5, 5, 5, 5), font=("Helvetica", 10, "bold")).pack(side=tk.TOP)
 	agentSettingsFrame = guiUtils.createFrame(mainSettingsFrame, tk.TOP, padding=(5, 5, 5, 5), ipady=10, anchor = tk.W)
+
+	numberOfAgentsFrame = guiUtils.createFrame(agentSettingsFrame, tk.TOP, anchor = tk.W)
+	ttk.Label(numberOfAgentsFrame, text="Agents per simulation : ", padding=(5, 5, 5, 5)).pack(side=tk.LEFT)
+	agentCountEntry = ttk.Entry(numberOfAgentsFrame, width=4)
+	agentCountEntry.pack(side=tk.RIGHT)
+	agentCountEntry.insert(0, "100")
+
+	numberOfInfectedAgentsFrame = guiUtils.createFrame(agentSettingsFrame, tk.TOP, anchor = tk.W)
+	ttk.Label(numberOfInfectedAgentsFrame, text="Infected agents per simulation : ", padding=(5, 5, 5, 5)).pack(side=tk.LEFT)
+	infectedAgentCountEntry = ttk.Entry(numberOfInfectedAgentsFrame, width=3)
+	infectedAgentCountEntry.pack(side=tk.RIGHT)
+	infectedAgentCountEntry.insert(0, "1")
 
 	maximumSpeedFrame = guiUtils.createFrame(agentSettingsFrame, tk.TOP, anchor = tk.W)
 	ttk.Label(maximumSpeedFrame, text="Maximum agent speed (pixels/s) : ", padding=(5, 5, 5, 5)).pack(side=tk.LEFT)
@@ -245,6 +257,8 @@ def defineSettingsDialogBox(window_root):
 		config["canvasWidth"] = int(sizeEntryWidth.get())
 		config["canvasHeight"] = int(sizeEntryHeight.get())
 		config["isLastSimulationQuarantine"] = utilities.isChecked(makeLastSimulationQuantineCheckbox)
+		config["numberOfAgents"] = int(agentCountEntry.get())
+		config["numberOfInfectedAgents"] = int(infectedAgentCountEntry.get())
 		config["maximumAgentSpeed"] = int(maximumSpeedEntry.get())
 		config["agentSize"] = int(agentSizeEntry.get())
 		config["enableCentralTravel"] = utilities.isChecked(enableCentralTravelCheckbox.state)
@@ -266,6 +280,8 @@ def defineSettingsDialogBox(window_root):
 		config["defaultRecoveryChance"] = min(max(config["defaultRecoveryChance"], 0), 100)
 		config["recoveryChanceProgress"] = min(max(config["recoveryChanceProgress"], 0), 100)
 		config["deathRisk"] = min(max(config["deathRisk"], 0), 100)
+		config["numberOfAgents"] = max(config["numberOfAgents"], 1)
+		config["numberOfInfectedAgents"] = min(max(config["numberOfInfectedAgents"], 0), config["numberOfAgents"])
 
 		# We apply the necessary tweaks
 		config["centralTravelChance"] = config["centralTravelChance"] / 100
@@ -284,6 +300,9 @@ def defineSettingsDialogBox(window_root):
 
 		# We send the config to shared data module
 		sharedData.setConfig(config)
+
+		# Close the window
+		settingsDialogBox.destroy()
 		
 		return config
 	
