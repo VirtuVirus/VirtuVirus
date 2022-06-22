@@ -28,7 +28,7 @@ def createAgent(simulation, agentType):
 	height = sharedData.getVarInConfig("canvasHeight")
 
 	# Randomly place the agent.
-	x_position, y_position = random.randint(10, width - 10), random.randint(10, height - 10)
+	x_position, y_position = random.randint(0, width), random.randint(0, height)
 
 	agent = {"2DModel": simulation["simulationZone"].create_oval(x_position, y_position, x_position+size, y_position+size, fill="blue")}
 	simulation["agents"].append(agent)

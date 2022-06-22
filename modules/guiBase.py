@@ -334,9 +334,15 @@ def spawnSimulations(settings):
 	agents.createAgents(sharedData.getGlobalVar("simulations"), sharedData.getVarInConfig("numberOfSaneAgents"), sharedData.getVarInConfig("numberOfInfectedAgents"), sharedData.getVarInConfig("numberOfImmuneAgents"))
 
 	# Update all counts (we're right at the start of the simulation, so this method is acceptable)
-	numberOfSaneAgents = sharedData.getVarInConfig("numberOfSaneAgents")*settings["simulationQuantity"]
-	numberOfInfectedAgents = sharedData.getVarInConfig("numberOfInfectedAgents")*settings["simulationQuantity"]
-	numberOfImmuneAgents = sharedData.getVarInConfig("numberOfImmuneAgents")*settings["simulationQuantity"]
+	match settings["isLastSimulationQuarantine"]:
+		case True:
+			numberOfSaneAgents = sharedData.getVarInConfig("numberOfSaneAgents")*(settings["simulationQuantity"] - 1)
+			numberOfInfectedAgents = sharedData.getVarInConfig("numberOfInfectedAgents")*(settings["simulationQuantity"] - 1)
+			numberOfImmuneAgents = sharedData.getVarInConfig("numberOfImmuneAgents")*(settings["simulationQuantity"] - 1)
+		case False:
+			numberOfSaneAgents = sharedData.getVarInConfig("numberOfSaneAgents")*settings["simulationQuantity"]
+			numberOfInfectedAgents = sharedData.getVarInConfig("numberOfInfectedAgents")*settings["simulationQuantity"]
+			numberOfImmuneAgents = sharedData.getVarInConfig("numberOfImmuneAgents")*settings["simulationQuantity"]
 	guiUtils.updateCounts(numberOfSaneAgents, numberOfInfectedAgents, numberOfImmuneAgents, 0)
 
 	# And we indicate that the simulation is ready, but not started.
