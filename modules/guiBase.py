@@ -2,7 +2,7 @@
 import tkinter as tk
 import tkinter.ttk as ttk
 import tkinter.messagebox as tkmb
-from sys import platform
+from sys import platform, exit
 from PIL import Image, ImageTk
 
 # Internal Imports
@@ -14,7 +14,17 @@ from modules import agents
 from modules import simulation
 
 def defineGUI():
-	root = tk.Tk()
+	try:
+		root = tk.Tk()
+	except Exception as error:
+		if "linux" in platform and "wayland" in error.__str__():
+			print("An error occured while initializing VirtuVirus.")
+			print("Tkinter's support for Wayland is fragile at best.")
+			print("Please switch to X11/Xorg or use a different terminal (like the one in VSCode).")
+			exit(1)
+		else:
+			print("An error occured while initializing VirtuVirus. Is Tkinter functional on your system ?")
+			exit(1)
 	root.title("VirtuVirus")
 	root.iconname("VirtuVirus")
 	root.minsize(defaultConfigVars.WIDTH, defaultConfigVars.HEIGHT)
