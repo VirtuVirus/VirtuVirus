@@ -1,5 +1,4 @@
 # External Imports
-from ast import Pass
 import tkinter as tk
 import tkinter.ttk as ttk
 import tkinter.messagebox as tkmb
@@ -12,6 +11,7 @@ from modules import guiUtils
 from modules import utilities
 from modules import sharedData
 from modules import agents
+from modules import simulation
 
 def defineGUI():
 	root = tk.Tk()
@@ -71,7 +71,8 @@ def defineGUI():
 
 	# Create start, stop and pause buttons with icons
 	StartAndStopZone = guiUtils.createFrame(simulationControlZone, tk.TOP)
-	StartSimulationButton = ttk.Button(StartAndStopZone, text="Start", padding=(2, 2, 2, 2)).pack(side=tk.LEFT)
+	StartSimulationButton = ttk.Button(StartAndStopZone, text="Start", padding=(2, 2, 2, 2),command=lambda: checkIfReadyThenStart())
+	StartSimulationButton.pack(side=tk.LEFT)
 	StopSimulationButton = ttk.Button(StartAndStopZone, text="Stop", padding=(2, 2, 2, 2), state=tk.DISABLED)
 	StopSimulationButton.pack(side=tk.RIGHT)
 	PauseSimulationButton = ttk.Button(simulationControlZone, text="Pause Simulation", padding=(2, 2, 2, 2), state=tk.DISABLED)
@@ -99,7 +100,7 @@ def defineGUI():
 
 	# Create area for status on the bottom
 	statusZone = guiUtils.createFrame(root, tk.BOTTOM, padding=(5, 5, 5, 5), fill="x")
-	statusLabel = ttk.Label(statusZone, text="No simulation has been spawned.", padding=(10, 0, 0, 0))
+	statusLabel = ttk.Label(statusZone, text="No simulation zone has been spawned.", padding=(10, 0, 0, 0))
 	statusLabel.pack(side=tk.LEFT)
 	timeLabel = ttk.Label(statusZone, text="Time has not been initiated.", padding=(0, 0, 5, 0))
 	timeLabel.pack(side=tk.RIGHT)
@@ -188,7 +189,7 @@ def defineSettingsDialogBox(window_root):
 	ttk.Label(maximumSpeedFrame, text="Maximum agent speed (pixels/s) : ", padding=(5, 5, 5, 5)).pack(side=tk.LEFT)
 	maximumSpeedEntry = ttk.Entry(maximumSpeedFrame, width=3)
 	maximumSpeedEntry.pack(side=tk.RIGHT)
-	maximumSpeedEntry.insert(0, "96")
+	maximumSpeedEntry.insert(0, "48")
 
 	agentSizeFrame = guiUtils.createFrame(agentSettingsFrame, tk.TOP, anchor = tk.W)
 	ttk.Label(agentSizeFrame, text="Agent size (pixels) : ", padding=(5, 5, 5, 5)).pack(side=tk.LEFT)	
@@ -273,10 +274,10 @@ def defineSettingsDialogBox(window_root):
 		config["numberOfImmuneAgents"] = int(immuneAgentCountEntry.get())
 		config["maximumAgentSpeed"] = int(maximumSpeedEntry.get())
 		config["agentSize"] = int(agentSizeEntry.get())
-		config["enableCentralTravel"] = utilities.isChecked(enableCentralTravelCheckbox.state)
+		config["isCentralTravelEnabled"] = utilities.isChecked(enableCentralTravelCheckbox.state)
 		config["centralTravelChance"] = int(centralBehaviorChanceEntry.get())
 		config["centerRange"] = int(centerRangeEntry.get())
-		config["enableHumanLogic"] = utilities.isChecked(enableHumanLogicCheckbox)
+		config["isHumanLogicEnabled"] = utilities.isChecked(enableHumanLogicCheckbox)
 		config["infectiveRange"] = int(infectiveRangeEntry.get())
 		config["infectionRisk"] = int(infectionChanceEntry.get())
 		config["defaultRecoveryChance"] = int(defaultRecoveryChanceEntry.get())
@@ -346,7 +347,7 @@ def spawnSimulations(settings):
 	guiUtils.updateCounts(numberOfSaneAgents, numberOfInfectedAgents, numberOfImmuneAgents, 0)
 
 	# And we indicate that the simulation is ready, but not started.
-	sharedData.getGlobalVar("interactiveGraphicalComponents")["statusLabel"].config(text="The simulations are ready, but not started.")
+	sharedData.getGlobalVar("interactiveGraphicalComponents")["statusLabel"].config(text="The simulation has not been started.")
 
 
 def clearSimulations():
@@ -359,7 +360,26 @@ def clearSimulations():
 	buttons["showGraphButton"].config(state=tk.DISABLED)
 
 	# We reset the status label to its original message
-	sharedData.getGlobalVar("interactiveGraphicalComponents")["statusLabel"].config(text="No simulation has been spawned.")
+	sharedData.getGlobalVar("interactiveGraphicalComponents")["statusLabel"].config(text="No simulation zone has been spawned.")
 
 def spawnExampleCanvas(root, settings):
 	pass
+
+def checkIfReadyThenStart():
+	if sharedData.getGlobalVar("simulations") is not None:
+		print("Starting simulation...")
+
+		buttons = sharedData.getGlobalVar("interactiveGraphicalComponents")["interactiveButtons"]
+		buttons["startButton"].config(state=tk.DISABLED)
+		buttons["openSettingsButton"].config(state=tk.DISABLED)
+		buttons["clearButton"].config(state=tk.DISABLED)
+		buttons["pauseButton"].config(state=tk.NORMAL)
+		buttons["stopButton"].config(state=tk.NORMAL)
+		buttons["showGraphButton"].config(state=tk.NORMAL)
+
+		sharedData.getGlobalVar("interactiveGraphicalComponents")["statusLabel"].config(text="Attempting to start the simulation...")
+		sharedData.getGlobalVar("interactiveGraphicalComponents")["timeLabel"].config(text="Initiating time...")
+
+		simulation.startSimulation(sharedData.getGlobalVar("simulations"))
+	else:
+		tkmb.showwarning("Warning",'No simulation zone has been spawned. Use the "Modify Settings" button to spawn them.')

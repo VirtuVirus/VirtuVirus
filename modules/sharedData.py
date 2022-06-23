@@ -23,6 +23,8 @@ def getVarInConfig(varName):
 
 # ----------------------------------------- Global Variables ----------------------------------------- #
 globalVars = {}
+globalVars["simulations"] = None
+globalVars["isSimulationRunning"] = False
 
 def getGlobalVar(varName):
 	global globalVars

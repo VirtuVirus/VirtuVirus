@@ -15,12 +15,12 @@ config["isLastSimulationQuarantine"] = True
 config["numberOfSaneAgents"] = 99							# Number of sane agents in a simulation.
 config["numberOfInfectedAgents"] = 1						# Number of infected agents in a simulation.
 config["numberOfImmuneAgents"] = 0						# Number of immune agents in a simulation.
-config["maximumAgentSpeed"] =  96						# Speed of the agents.
+config["maximumAgentSpeed"] =  48						# Speed of the agents.
 config["agentSize"] = 10										# Size of the agents.
-config["enableCentralTravel"] = True
+config["isCentralTravelEnabled"] = True
 config["centralTravelChance"] = 0.05						# Chance of the central behavior to be activated per second.
 config["centerRange"] = 30						# Range of the central area the agents will try to get to.
-config["enableHumanLogic"] = True							# Agents' actions will depend on the number of infected.
+config["isHumanLogicEnabled"] = True							# Agents' actions will depend on the number of infected.
 
 # Virus
 config["infectiveRange"] = 4								# Range of infection is defined by the size multiplied by this number.
