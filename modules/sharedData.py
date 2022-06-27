@@ -39,3 +39,14 @@ def writeGlobalVar(varName, varValue):
 def getAllGlobalVars():
 	global globalVars
 	return globalVars
+
+# ----------------------------------------- Data collection ----------------------------------------- #
+collectedData = {}
+collectedData["agentTotalOnStart"] = 0
+collectedData["totalCounts"] = []
+
+def addTotalCount(saneCount, infectedCount, immuneCount, deadCount):
+	collectedData["totalCounts"].append({"Sane":saneCount, "Infected":infectedCount, "Immune":immuneCount, "Dead":deadCount})
+
+def retrieveTotalCounts():
+	return collectedData["totalCounts"]

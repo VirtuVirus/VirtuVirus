@@ -9,17 +9,11 @@ from modules import utilities
 
 def createAgents(simulations, saneQuantity, infectedQuantity, immuneQuantity):
 	for simulation in simulations:
-		if simulation["isInfectiveContainer"] == False:
+		if simulation["isQuarantine"] == False:
 			for i in range(saneQuantity):
 				createAgent(simulation, "Sane")
-	
-	for simulation in simulations:
-		if simulation["isInfectiveContainer"] == False:
 			for i in range(infectedQuantity):
 				createAgent(simulation, "Infected")
-
-	for simulation in simulations:
-		if simulation["isInfectiveContainer"] == False:
 			for i in range(immuneQuantity):
 				createAgent(simulation, "Immune")
 

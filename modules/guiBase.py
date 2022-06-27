@@ -12,6 +12,7 @@ from modules import utilities
 from modules import sharedData
 from modules import agents
 from modules import simulation
+from modules import graph
 
 # Dev Vars
 enableDebugButtons = False
@@ -95,7 +96,7 @@ def defineGUI():
 	
 	OpenSettingsButton = ttk.Button(simulationControlZone, text="Modify Settings", padding=(2, 2, 2, 2), command=lambda: defineSettingsDialogBox(root))
 	OpenSettingsButton.pack(side=tk.TOP)
-	ShowCurrentGraph = ttk.Button(simulationControlZone, text="Show Graph", padding=(2, 2, 2, 2), state=tk.DISABLED)
+	ShowCurrentGraph = ttk.Button(simulationControlZone, text="Show Graph", command=lambda: showGraphSelectWindow(root), padding=(2, 2, 2, 2), state=tk.DISABLED)
 	ShowCurrentGraph.pack(side=tk.TOP)
 
 	if enableDebugButtons == True:
@@ -346,6 +347,13 @@ def defineSettingsDialogBox(window_root):
 def spawnSimulations(settings):
 	guiUtils.clearCanvasses(sharedData.getGlobalVar("interactiveGraphicalComponents")["simulationZone"], sharedData.getGlobalVar("interactiveGraphicalComponents")["mainWindowRoot"])
 
+	# We modify some buttons.
+	buttons = sharedData.getGlobalVar("interactiveGraphicalComponents")["interactiveButtons"]
+	buttons["startButton"].config(state=tk.NORMAL)
+	buttons["pauseButton"].config(state=tk.DISABLED)
+	buttons["stopButton"].config(state=tk.DISABLED)
+	buttons["showGraphButton"].config(state=tk.DISABLED)
+
 	guiUtils.generateCanvasses(sharedData.getGlobalVar("interactiveGraphicalComponents")["simulationZone"], settings["simulationQuantity"], settings["canvasWidth"], settings["canvasHeight"], sharedData.getGlobalVar("interactiveGraphicalComponents")["mainWindowRoot"], settings["isLastSimulationQuarantine"])
 	agents.createAgents(sharedData.getGlobalVar("simulations"), sharedData.getVarInConfig("numberOfSaneAgents"), sharedData.getVarInConfig("numberOfInfectedAgents"), sharedData.getVarInConfig("numberOfImmuneAgents"))
 
@@ -369,7 +377,7 @@ def spawnSimulations(settings):
 def clearSimulations():
 	guiUtils.clearCanvasses(sharedData.getGlobalVar("interactiveGraphicalComponents")["simulationZone"], sharedData.getGlobalVar("interactiveGraphicalComponents")["mainWindowRoot"])
 
-	# We disable some buttons.
+	# We modify some buttons.
 	buttons = sharedData.getGlobalVar("interactiveGraphicalComponents")["interactiveButtons"]
 	buttons["startButton"].config(state=tk.NORMAL)
 	buttons["pauseButton"].config(state=tk.DISABLED)
@@ -428,3 +436,30 @@ def pauseOrResumeSimulation():
 		sharedData.writeGlobalVar("isSimulationPaused", False)
 		sharedData.getGlobalVar("interactiveGraphicalComponents")["interactiveButtons"]["pauseButton"].config(text="Pause Simulation")
 		sharedData.getGlobalVar("interactiveGraphicalComponents")["statusLabel"].config(text="Simulation has resumed.")
+
+def showGraphSelectWindow(window_root):
+	if sharedData.getGlobalVar("isSimulationPaused") == False and sharedData.getGlobalVar("isSimulationRunning") == True:
+		pauseOrResumeSimulation()
+	
+	graphSelectWindow = tk.Toplevel()
+	graphSelectWindow.title("Graph Selection")
+	graphSelectWindow.iconname("Graph Selection")
+	graphSelectWindow.resizable(False, False)
+	graphSelectWindow.wm_iconname("Simulation Setup")
+
+	# Lock main window
+	graphSelectWindow.grab_set()
+	graphSelectWindow.wm_transient(window_root)
+
+	# Set icon
+	if "win" in platform:
+		graphSelectWindow.wm_iconbitmap(default="assets/icon.ico")
+	else:
+		img = tk.PhotoImage(file='assets/icon.png')
+		graphSelectWindow.tk.call('wm', 'iconphoto', graphSelectWindow._w, img)
+	
+	mainGraphSelectFrame = guiUtils.createFrame(graphSelectWindow, tk.LEFT, fill="both", expand=True)
+
+	# Add button to generate a graph with the total
+	ttk.Button(mainGraphSelectFrame, text="Every simulation / Every agent type / Frames", command=lambda: graph.generateGraph("allTotalFrame"), padding=(2, 2, 2, 2)).pack(side=tk.TOP)
+	ttk.Button(mainGraphSelectFrame, text="Mean of all simulations / Every agent type / Frames", command=lambda: graph.generateGraph("allMeanFrame"), padding=(2, 2, 2, 2)).pack(side=tk.TOP)

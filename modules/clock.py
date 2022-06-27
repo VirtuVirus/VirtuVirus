@@ -22,6 +22,7 @@ def clockThread():
 
 		# Update the counts.
 		guiUtils.updateCounts(saneCount, infectedCount, immuneCount, deadCount)
+		sharedData.addTotalCount(saneCount, infectedCount, immuneCount, deadCount)
 
 		# Update time
 		sharedData.getGlobalVar("interactiveGraphicalComponents")["timeLabel"].config(text="Frames : " + str(frameTime) + " | Time (in-simulation) : " + str(int(frameTime/framerate)) + "s")
