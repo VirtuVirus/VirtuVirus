@@ -13,6 +13,9 @@ from modules import sharedData
 from modules import agents
 from modules import simulation
 
+# Dev Vars
+enableDebugButtons = False
+
 def defineGUI():
 	try:
 		root = tk.Tk()
@@ -83,7 +86,7 @@ def defineGUI():
 	StartAndStopZone = guiUtils.createFrame(simulationControlZone, tk.TOP)
 	StartSimulationButton = ttk.Button(StartAndStopZone, text="Start", padding=(2, 2, 2, 2),command=lambda: checkIfReadyThenStart())
 	StartSimulationButton.pack(side=tk.LEFT)
-	StopSimulationButton = ttk.Button(StartAndStopZone, text="Stop", padding=(2, 2, 2, 2), state=tk.DISABLED)
+	StopSimulationButton = ttk.Button(StartAndStopZone, text="Stop", padding=(2, 2, 2, 2), command=lambda: stopSimulation(), state=tk.DISABLED)
 	StopSimulationButton.pack(side=tk.RIGHT)
 	PauseSimulationButton = ttk.Button(simulationControlZone, text="Pause Simulation", padding=(2, 2, 2, 2), state=tk.DISABLED)
 	PauseSimulationButton.pack(side=tk.TOP)
@@ -94,6 +97,11 @@ def defineGUI():
 	OpenSettingsButton.pack(side=tk.TOP)
 	ShowCurrentGraph = ttk.Button(simulationControlZone, text="Show Graph", padding=(2, 2, 2, 2), state=tk.DISABLED)
 	ShowCurrentGraph.pack(side=tk.TOP)
+
+	if enableDebugButtons == True:
+		PrintGlobalVariablesButton = ttk.Button(simulationControlZone, text="Print Global Variables", padding=(2, 2, 2, 2), command=lambda: print(sharedData.getAllGlobalVars()))
+		PrintGlobalVariablesButton.pack(side=tk.TOP)
+
 
 	# Create the zone for the control of the agents
 	ttk.Label(agentsControlZone, text="Agents", padding=(5, 5, 5, 5), font=("Helvetica", 10, "bold")).pack(side=tk.TOP)
@@ -284,7 +292,7 @@ def defineSettingsDialogBox(window_root):
 		config["numberOfImmuneAgents"] = int(immuneAgentCountEntry.get())
 		config["maximumAgentSpeed"] = int(maximumSpeedEntry.get())
 		config["agentSize"] = int(agentSizeEntry.get())
-		config["isCentralTravelEnabled"] = utilities.isChecked(enableCentralTravelCheckbox.state)
+		config["isCentralTravelEnabled"] = utilities.isChecked(enableCentralTravelCheckbox)
 		config["centralTravelChance"] = int(centralBehaviorChanceEntry.get())
 		config["centerRange"] = int(centerRangeEntry.get())
 		config["isHumanLogicEnabled"] = utilities.isChecked(enableHumanLogicCheckbox)
@@ -358,6 +366,7 @@ def spawnSimulations(settings):
 
 	# And we indicate that the simulation is ready, but not started.
 	sharedData.getGlobalVar("interactiveGraphicalComponents")["statusLabel"].config(text="The simulation has not been started.")
+	sharedData.getGlobalVar("interactiveGraphicalComponents")["timeLabel"].config(text="Waiting for simulation to start...")
 
 
 def clearSimulations():
@@ -365,12 +374,14 @@ def clearSimulations():
 
 	# We disable some buttons.
 	buttons = sharedData.getGlobalVar("interactiveGraphicalComponents")["interactiveButtons"]
+	buttons["startButton"].config(state=tk.NORMAL)
 	buttons["pauseButton"].config(state=tk.DISABLED)
 	buttons["stopButton"].config(state=tk.DISABLED)
 	buttons["showGraphButton"].config(state=tk.DISABLED)
 
 	# We reset the status label to its original message
 	sharedData.getGlobalVar("interactiveGraphicalComponents")["statusLabel"].config(text="No simulation zone has been spawned.")
+	sharedData.getGlobalVar("interactiveGraphicalComponents")["timeLabel"].config(text="Time has not been initiated.")
 
 def spawnExampleCanvas(root, settings):
 	pass
@@ -393,3 +404,18 @@ def checkIfReadyThenStart():
 		simulation.startSimulation(sharedData.getGlobalVar("simulations"))
 	else:
 		tkmb.showwarning("Warning",'No simulation zone has been spawned. Use the "Modify Settings" button to spawn them.')
+
+def stopSimulation():
+	print("Stopping simulation...")
+
+	buttons = sharedData.getGlobalVar("interactiveGraphicalComponents")["interactiveButtons"]
+	buttons["startButton"].config(state=tk.DISABLED)
+	buttons["openSettingsButton"].config(state=tk.NORMAL)
+	buttons["clearButton"].config(state=tk.NORMAL)
+	buttons["pauseButton"].config(state=tk.DISABLED)
+	buttons["stopButton"].config(state=tk.DISABLED)
+	buttons["showGraphButton"].config(state=tk.NORMAL)
+
+	sharedData.getGlobalVar("interactiveGraphicalComponents")["statusLabel"].config(text="Attempting to stop simulation...")
+
+	simulation.stopSimulation(sharedData.getGlobalVar("simulations"))

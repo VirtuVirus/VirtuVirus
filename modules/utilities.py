@@ -3,6 +3,7 @@ from threading import Thread
 
 # Internal Imports
 from modules import defaultConfigVars
+from modules import sharedData
 
 def createThread(ThreadManagementArray, function, arguments=()):
 	thread = Thread(target=function, args=arguments)
@@ -22,3 +23,22 @@ def isChecked(checkbox):
 		return checkbox.state()[0] == "selected" 
 	except: 
 		return False
+
+def getTotalCount(agentType):
+	simulations = sharedData.getGlobalVar("simulations")
+	count = 0
+	match agentType:
+		case "Sane":
+			for simulation in simulations:
+				count += len(simulation["saneAgents"])
+		case "Infected":
+			for simulation in simulations:
+				count += len(simulation["infectedAgents"])
+		case "Dead":
+			for simulation in simulations:
+				count += len(simulation["deadAgents"])
+		case "Immune":
+			for simulation in simulations:
+				count += len(simulation["immuneAgents"])
+
+	return count
