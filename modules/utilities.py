@@ -1,5 +1,6 @@
 # External Imports
 from threading import Thread
+from time import sleep
 
 # Internal Imports
 from modules import defaultConfigVars
@@ -42,3 +43,7 @@ def getTotalCount(agentType):
 				count += len(simulation["immuneAgents"])
 
 	return count
+
+def waitIfPaused():
+	while sharedData.getGlobalVar("isSimulationPaused"):
+		sleep(1)

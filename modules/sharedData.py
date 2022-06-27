@@ -25,6 +25,7 @@ def getVarInConfig(varName):
 globalVars = {}
 globalVars["simulations"] = None
 globalVars["isSimulationRunning"] = False
+globalVars["isSimulationPaused"] = False
 globalVars["frameTime"] = None
 
 def getGlobalVar(varName):

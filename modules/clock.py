@@ -26,6 +26,8 @@ def clockThread():
 		# Update time
 		sharedData.getGlobalVar("interactiveGraphicalComponents")["timeLabel"].config(text="Frames : " + str(frameTime) + " | Time (in-simulation) : " + str(int(frameTime/framerate)) + "s")
 
+		utilities.waitIfPaused()
 		sleep(1/framerate)
+
 		frameTime += 1
 		sharedData.writeGlobalVar("frameTime", frameTime)

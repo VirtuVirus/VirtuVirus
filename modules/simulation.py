@@ -27,6 +27,8 @@ def startSimulation(simulations):
 
 def stopSimulation(simulations):
 	sharedData.writeGlobalVar("isSimulationRunning", False)
+	sharedData.writeGlobalVar("isSimulationPaused", False)
+	sharedData.getGlobalVar("interactiveGraphicalComponents")["interactiveButtons"]["pauseButton"].config(text="Pause Simulation")
 
 	# Here the time module will stop.
 

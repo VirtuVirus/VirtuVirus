@@ -124,6 +124,7 @@ def moveAgent(agent, simulation):
 		if topPos <= 0 or bottomPos >= canvasHeight:
 			local_y_speed = -local_y_speed
 		
+		utilities.waitIfPaused()
 		time.sleep(1/framerate) # Needs syncing
 	return
 
@@ -195,6 +196,7 @@ def infectAgent(agent, simulation):
 			KillAgent(agent, simulation)
 			return
 		
+		utilities.waitIfPaused()
 		time.sleep(1/framerate) # Needs syncing
 	
 	canvas.delete(infectionZone)

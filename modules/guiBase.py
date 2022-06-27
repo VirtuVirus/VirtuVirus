@@ -88,7 +88,7 @@ def defineGUI():
 	StartSimulationButton.pack(side=tk.LEFT)
 	StopSimulationButton = ttk.Button(StartAndStopZone, text="Stop", padding=(2, 2, 2, 2), command=lambda: stopSimulation(), state=tk.DISABLED)
 	StopSimulationButton.pack(side=tk.RIGHT)
-	PauseSimulationButton = ttk.Button(simulationControlZone, text="Pause Simulation", padding=(2, 2, 2, 2), state=tk.DISABLED)
+	PauseSimulationButton = ttk.Button(simulationControlZone, text="Pause Simulation", command=lambda: pauseOrResumeSimulation(),padding=(2, 2, 2, 2), state=tk.DISABLED)
 	PauseSimulationButton.pack(side=tk.TOP)
 	ClearSimulationButton = ttk.Button(simulationControlZone, text="Clear Simulation", command=lambda: clearSimulations(), padding=(2, 2, 2, 2))
 	ClearSimulationButton.pack(side=tk.TOP)
@@ -145,9 +145,6 @@ def defineSettingsDialogBox(window_root):
 		settingsDialogBox.tk.call('wm', 'iconphoto', settingsDialogBox._w, img)
 	
 	mainSettingsFrame = guiUtils.createFrame(settingsDialogBox, tk.LEFT, fill="both", expand=True)
-
-	#exampleCanvas = tk.Canvas(settingsDialogBox, bg="white")
-	#exampleCanvas.pack(side=tk.RIGHT, fill="both", expand=True)
 
 	# Simulation
 	ttk.Label(mainSettingsFrame, text="Simulation", padding=(5, 5, 5, 5), font=("Helvetica", 10, "bold")).pack(side=tk.TOP)
@@ -344,7 +341,7 @@ def defineSettingsDialogBox(window_root):
 	# Bottom frame
 	bottomFrame = guiUtils.createFrame(mainSettingsFrame, tk.BOTTOM, padding=(5, 5, 5, 5))
 	ttk.Button(bottomFrame, text="Apply", command=lambda: spawnSimulations(generateConfigFromEntries()), padding=(2, 2, 2, 2)).pack(side=tk.LEFT)
-	ttk.Button(bottomFrame, text="Preview", command=lambda: spawnExampleCanvas(settingsDialogBox, generateConfigFromEntries()), padding=(2, 2, 2, 2)).pack(side=tk.RIGHT)
+	#ttk.Button(bottomFrame, text="Preview", command=lambda: spawnExampleCanvas(settingsDialogBox, generateConfigFromEntries()), padding=(2, 2, 2, 2)).pack(side=tk.RIGHT)
 
 def spawnSimulations(settings):
 	guiUtils.clearCanvasses(sharedData.getGlobalVar("interactiveGraphicalComponents")["simulationZone"], sharedData.getGlobalVar("interactiveGraphicalComponents")["mainWindowRoot"])
@@ -419,3 +416,15 @@ def stopSimulation():
 	sharedData.getGlobalVar("interactiveGraphicalComponents")["statusLabel"].config(text="Attempting to stop simulation...")
 
 	simulation.stopSimulation(sharedData.getGlobalVar("simulations"))
+
+def pauseOrResumeSimulation():
+	if sharedData.getGlobalVar("isSimulationPaused") == False:
+		print("Pausing simulation...")
+		sharedData.writeGlobalVar("isSimulationPaused", True)
+		sharedData.getGlobalVar("interactiveGraphicalComponents")["interactiveButtons"]["pauseButton"].config(text="Resume Simulation")
+		sharedData.getGlobalVar("interactiveGraphicalComponents")["statusLabel"].config(text="Simulation is paused.")
+	else:
+		print("Resuming simulation...")
+		sharedData.writeGlobalVar("isSimulationPaused", False)
+		sharedData.getGlobalVar("interactiveGraphicalComponents")["interactiveButtons"]["pauseButton"].config(text="Pause Simulation")
+		sharedData.getGlobalVar("interactiveGraphicalComponents")["statusLabel"].config(text="Simulation has resumed.")
