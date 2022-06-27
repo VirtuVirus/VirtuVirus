@@ -1,5 +1,9 @@
+# External Imports
+import matplotlib
+matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 
+# Internal Imports
 from modules import sharedData
 
 def generateGraph(graphType):
