@@ -7,6 +7,8 @@ import matplotlib.pyplot as plt
 from modules import sharedData
 
 def generateGraph(graphType):
+	plt.close()
+
 	match graphType:
 		case 'allTotalFrame':
 			saneData = []
@@ -42,7 +44,7 @@ def generateGraph(graphType):
 			deadData = []
 			for count in sharedData.retrieveTotalCounts():
 				saneData.append(count["Sane"]/simulationCount)
-				infectedData.append(count["Infected"])/simulationCount
+				infectedData.append(count["Infected"]/simulationCount)
 				immuneData.append(count["Immune"]/simulationCount)
 				deadData.append(count["Dead"]/simulationCount)
 			

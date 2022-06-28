@@ -50,3 +50,6 @@ def addTotalCount(saneCount, infectedCount, immuneCount, deadCount):
 
 def retrieveTotalCounts():
 	return collectedData["totalCounts"]
+
+def resetTotalCounts():
+	collectedData["totalCounts"] = []
