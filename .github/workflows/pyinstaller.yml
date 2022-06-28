@@ -20,7 +20,7 @@ jobs:
     - name: Install PyInstaller
       run: pip install pyinstaller
     - name: Package with PyInstaller
-      run: pyinstaller --onefile VirtuVirus.py
+      run: pyinstaller --hidden-import='PIL._tkinter_finder' --onefile VirtuVirus.py
     - name: Post Packaging Step
       run: mv dist/VirtuVirus VirtuVirus
     - name: Extract current branch name
@@ -51,7 +51,7 @@ jobs:
     - name: Install PyInstaller
       run: pip install pyinstaller
     - name: Package with PyInstaller
-      run: pyinstaller --onefile -F --add-data "assets/icon.ico;assets/icon.ico" --icon="assets/icon.ico" VirtuVirus.py
+      run: pyinstaller --onefile -F --add-data "assets/icon.ico;assets/icon.ico" --icon="assets/icon.ico" --hidden-import='PIL._tkinter_finder' VirtuVirus.py
     - name: Post Packaging Step
       shell: bash
       run: mv dist/VirtuVirus.exe VirtuVirus.exe

@@ -10,16 +10,13 @@ def generateGraph(graphType):
 	match graphType:
 		case 'allTotalFrame':
 			saneData = []
-			for count in sharedData.retrieveTotalCounts():
-				saneData.append(count["Sane"])
 			infectedData = []
-			for count in sharedData.retrieveTotalCounts():
-				infectedData.append(count["Infected"])
 			immuneData = []
-			for count in sharedData.retrieveTotalCounts():
-				immuneData.append(count["Immune"])
 			deadData = []
 			for count in sharedData.retrieveTotalCounts():
+				saneData.append(count["Sane"])
+				infectedData.append(count["Infected"])
+				immuneData.append(count["Immune"])
 				deadData.append(count["Dead"])
 			
 			plt.plot(saneData, label="Sane", color="blue")
@@ -40,16 +37,13 @@ def generateGraph(graphType):
 				simulationCount -= 1
 
 			saneData = []
-			for count in sharedData.retrieveTotalCounts():
-				saneData.append(count["Sane"]/simulationCount)
 			infectedData = []
-			for count in sharedData.retrieveTotalCounts():
-				infectedData.append(count["Infected"]/simulationCount)
 			immuneData = []
-			for count in sharedData.retrieveTotalCounts():
-				immuneData.append(count["Immune"]/simulationCount)
 			deadData = []
 			for count in sharedData.retrieveTotalCounts():
+				saneData.append(count["Sane"]/simulationCount)
+				infectedData.append(count["Infected"])/simulationCount
+				immuneData.append(count["Immune"]/simulationCount)
 				deadData.append(count["Dead"]/simulationCount)
 			
 			plt.plot(saneData, label="Sane", color="blue")
