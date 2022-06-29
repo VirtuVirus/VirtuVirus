@@ -41,15 +41,14 @@ def getAllGlobalVars():
 	return globalVars
 
 # ----------------------------------------- Data collection ----------------------------------------- #
-collectedData = {}
-collectedData["agentTotalOnStart"] = 0
-collectedData["totalCounts"] = []
+collectedData = []
 
-def addTotalCount(saneCount, infectedCount, immuneCount, deadCount):
-	collectedData["totalCounts"].append({"Sane":saneCount, "Infected":infectedCount, "Immune":immuneCount, "Dead":deadCount})
+def addFrameCount(frameSimulationsCounts):
+	collectedData.append(frameSimulationsCounts)
 
-def retrieveTotalCounts():
-	return collectedData["totalCounts"]
+def retrieveData():
+	return collectedData
 
-def resetTotalCounts():
-	collectedData["totalCounts"] = []
+def resetData():
+	global collectedData
+	collectedData = []

@@ -130,9 +130,9 @@ def defineSettingsDialogBox(window_root):
 	settingsDialogBox = tk.Toplevel()
 	settingsDialogBox.title("Simulation Setup")
 	settingsDialogBox.iconname("Simulation Setup")
-	#settingsDialogBox.minsize(700, 500)
 	settingsDialogBox.resizable(False, False)
 	settingsDialogBox.wm_iconname("Simulation Setup")
+	settingsDialogBox.wm_title("Simulation Setup")
 
 	# Lock main window
 	settingsDialogBox.grab_set()
@@ -173,11 +173,11 @@ def defineSettingsDialogBox(window_root):
 	sizeEntryHeight.pack(side=tk.RIGHT)
 	sizeEntryHeight.insert(0, "300")
 
-	makeLastSimulationQuantineFrame = guiUtils.createFrame(simulationSettingsFrame, tk.TOP, anchor = tk.W)
-	ttk.Label(makeLastSimulationQuantineFrame, text="Make last simulation quarantine : ", padding=(5, 5, 5, 5)).pack(side=tk.LEFT)
-	makeLastSimulationQuantineCheckbox = ttk.Checkbutton(makeLastSimulationQuantineFrame, variable=tk.IntVar())
-	makeLastSimulationQuantineCheckbox.pack(side=tk.RIGHT)
-	makeLastSimulationQuantineCheckbox.state(["selected"])
+	makeLastSimulationQuarantineFrame = guiUtils.createFrame(simulationSettingsFrame, tk.TOP, anchor = tk.W)
+	ttk.Label(makeLastSimulationQuarantineFrame, text="Make last simulation quarantine : ", padding=(5, 5, 5, 5)).pack(side=tk.LEFT)
+	makeLastSimulationQuarantineCheckbox = ttk.Checkbutton(makeLastSimulationQuarantineFrame, variable=tk.IntVar())
+	makeLastSimulationQuarantineCheckbox.pack(side=tk.RIGHT)
+	makeLastSimulationQuarantineCheckbox.state(["selected"])
 
 	# Agents
 	ttk.Label(mainSettingsFrame, text="Agents", padding=(5, 5, 5, 5), font=("Helvetica", 10, "bold")).pack(side=tk.TOP)
@@ -284,7 +284,7 @@ def defineSettingsDialogBox(window_root):
 		config["framerate"] = int(framerateEntry.get())
 		config["canvasWidth"] = int(sizeEntryWidth.get())
 		config["canvasHeight"] = int(sizeEntryHeight.get())
-		config["isLastSimulationQuarantine"] = utilities.isChecked(makeLastSimulationQuantineCheckbox)
+		config["isLastSimulationQuarantine"] = utilities.isChecked(makeLastSimulationQuarantineCheckbox)
 		config["numberOfSaneAgents"] = int(saneAgentCountEntry.get())
 		config["numberOfInfectedAgents"] = int(infectedAgentCountEntry.get())
 		config["numberOfImmuneAgents"] = int(immuneAgentCountEntry.get())
@@ -341,8 +341,8 @@ def defineSettingsDialogBox(window_root):
 	
 	# Bottom frame
 	bottomFrame = guiUtils.createFrame(mainSettingsFrame, tk.BOTTOM, padding=(5, 5, 5, 5))
-	ttk.Button(bottomFrame, text="Apply", command=lambda: spawnSimulations(generateConfigFromEntries()), padding=(2, 2, 2, 2)).pack(side=tk.LEFT)
-	#ttk.Button(bottomFrame, text="Preview", command=lambda: spawnExampleCanvas(settingsDialogBox, generateConfigFromEntries()), padding=(2, 2, 2, 2)).pack(side=tk.RIGHT)
+	ttk.Button(bottomFrame, text="Spawn", command=lambda: spawnSimulations(generateConfigFromEntries()), padding=(2, 2, 2, 2)).pack(side=tk.LEFT)
+	ttk.Button(bottomFrame, text="Cancel", command=settingsDialogBox.destroy, padding=(2, 2, 2, 2)).pack(side=tk.RIGHT)
 
 def spawnSimulations(settings):
 	guiUtils.clearCanvasses(sharedData.getGlobalVar("interactiveGraphicalComponents")["simulationZone"], sharedData.getGlobalVar("interactiveGraphicalComponents")["mainWindowRoot"])
@@ -373,7 +373,6 @@ def spawnSimulations(settings):
 	sharedData.getGlobalVar("interactiveGraphicalComponents")["statusLabel"].config(text="The simulation has not been started.")
 	sharedData.getGlobalVar("interactiveGraphicalComponents")["timeLabel"].config(text="Waiting for simulation to start...")
 
-
 def clearSimulations():
 	guiUtils.clearCanvasses(sharedData.getGlobalVar("interactiveGraphicalComponents")["simulationZone"], sharedData.getGlobalVar("interactiveGraphicalComponents")["mainWindowRoot"])
 
@@ -387,9 +386,6 @@ def clearSimulations():
 	# We reset the status label to its original message
 	sharedData.getGlobalVar("interactiveGraphicalComponents")["statusLabel"].config(text="No simulation zone has been spawned.")
 	sharedData.getGlobalVar("interactiveGraphicalComponents")["timeLabel"].config(text="Time has not been initiated.")
-
-def spawnExampleCanvas(root, settings):
-	pass
 
 def checkIfReadyThenStart():
 	if sharedData.getGlobalVar("simulations") is not None:
@@ -438,14 +434,17 @@ def pauseOrResumeSimulation():
 		sharedData.getGlobalVar("interactiveGraphicalComponents")["statusLabel"].config(text="Simulation has resumed.")
 
 def showGraphSelectWindow(window_root):
+	# Pause simulation
 	if sharedData.getGlobalVar("isSimulationPaused") == False and sharedData.getGlobalVar("isSimulationRunning") == True:
 		pauseOrResumeSimulation()
 	
+	# Window
 	graphSelectWindow = tk.Toplevel()
 	graphSelectWindow.title("Graph Selection")
 	graphSelectWindow.iconname("Graph Selection")
 	graphSelectWindow.resizable(False, False)
-	graphSelectWindow.wm_iconname("Simulation Setup")
+	graphSelectWindow.wm_iconname("Graph Selection")
+	graphSelectWindow.wm_title("Graph Selection")
 
 	# Lock main window
 	graphSelectWindow.grab_set()
@@ -457,9 +456,90 @@ def showGraphSelectWindow(window_root):
 	else:
 		img = tk.PhotoImage(file='assets/icon.png')
 		graphSelectWindow.tk.call('wm', 'iconphoto', graphSelectWindow._w, img)
-	
-	mainGraphSelectFrame = guiUtils.createFrame(graphSelectWindow, tk.LEFT, fill="both", expand=True)
 
-	# Add button to generate a graph with the total
-	ttk.Button(mainGraphSelectFrame, text="Every simulation / Every agent type / Frames", command=lambda: graph.generateGraph("allTotalFrame"), padding=(2, 2, 2, 2)).pack(side=tk.TOP)
-	ttk.Button(mainGraphSelectFrame, text="Mean of all simulations / Every agent type / Frames", command=lambda: graph.generateGraph("allMeanFrame"), padding=(2, 2, 2, 2)).pack(side=tk.TOP)
+	# Variables
+	dataTypeVariable = tk.StringVar(value="total")
+	graphTypeVariable = tk.StringVar(value="line")
+	timeFormatVariable = tk.StringVar(value="frames")
+	simulations = sharedData.getGlobalVar("simulations")
+	
+	# GUI
+	mainGraphSelectFrame = guiUtils.createFrame(graphSelectWindow, tk.TOP, fill="both", expand=True)
+
+	dataTypeFrame = guiUtils.createFrame(mainGraphSelectFrame, tk.LEFT, padding=(5, 5, 5, 5), ipady=10, anchor = tk.N)
+	ttk.Label(dataTypeFrame, text="Data Type", font=("Helvetica", 10, "bold"), padding=(5, 5, 5, 5)).pack(side = tk.TOP, anchor = tk.N)
+	totalType = ttk.Radiobutton(dataTypeFrame, text="Total", variable=dataTypeVariable, value="total")
+	totalType.pack(anchor = tk.W)
+	meanType = ttk.Radiobutton(dataTypeFrame, text="Mean", variable=dataTypeVariable, value="mean")
+	meanType.pack(anchor = tk.W)
+
+	graphTypeSelectionFrame = guiUtils.createFrame(mainGraphSelectFrame, tk.LEFT, padding=(5, 5, 5, 5), ipady=10, anchor = tk.N)
+	ttk.Label(graphTypeSelectionFrame, text="Graph Type", font=("Helvetica", 10, "bold"), padding=(5, 5, 5, 5)).pack(side = tk.TOP, anchor = tk.N)
+	lineType = ttk.Radiobutton(graphTypeSelectionFrame, text="Line", variable=graphTypeVariable, value="line")
+	lineType.pack(anchor = tk.W)
+	barType = ttk.Radiobutton(graphTypeSelectionFrame, text="Bar", variable=graphTypeVariable, value="bar")
+	barType.pack(anchor = tk.W)
+
+	simulationSelectionFrame = guiUtils.createFrame(mainGraphSelectFrame, tk.LEFT, padding=(5, 5, 5, 5), ipady=10, anchor = tk.N)
+	simulationSelectionFrame.pack(side = tk.LEFT)
+	ttk.Label(simulationSelectionFrame, text="Simulations", font=("Helvetica", 10, "bold"), padding=(5, 5, 5, 5)).pack(side = tk.TOP, anchor = tk.N)
+	# That sad moment when you discover that ttk has no support for listboxes.
+	simulationSelectionList = tk.Listbox(simulationSelectionFrame, selectmode=tk.MULTIPLE, height=5, width=15)
+	simulationSelectionList.pack(side = tk.LEFT, anchor = tk.N, expand=True, fill=tk.Y)
+	for i in range(1,len(simulations)+1):
+		if simulations[i-1]["isQuarantine"] == True:
+			simulationSelectionList.insert("end", "Quarantine")
+		else:
+			simulationSelectionList.insert("end", "Simulation "+str(i))
+	# ttk is being annoying today... The scrollbar's appearance is too big on Linux because of the clam theme. Still, it works just fine.
+	scrollBar = ttk.Scrollbar(simulationSelectionFrame, orient=tk.VERTICAL, command=simulationSelectionList.yview)
+	scrollBar.pack(side=tk.RIGHT, anchor = tk.N, fill=tk.Y)
+	simulationSelectionList['yscrollcommand'] = scrollBar.set
+
+	agentSelectionFrame = guiUtils.createFrame(mainGraphSelectFrame, tk.LEFT, padding=(5, 5, 5, 5), ipady=10, anchor = tk.N)
+	ttk.Label(agentSelectionFrame, text="Agents", font=("Helvetica", 10, "bold"), padding=(5, 5, 5, 5)).pack(side = tk.TOP, anchor = tk.N)
+
+	saneCheckboxFrame = guiUtils.createFrame(agentSelectionFrame, tk.TOP, anchor = tk.W)
+	ttk.Label(saneCheckboxFrame, text="Sane : ", padding=(5, 5, 5, 5)).pack(side=tk.LEFT, anchor = tk.N)
+	saneCheckbox = ttk.Checkbutton(saneCheckboxFrame, variable=tk.IntVar())
+	saneCheckbox.pack(side=tk.RIGHT)
+	saneCheckbox.state(["selected"])
+
+	infectedCheckboxFrame = guiUtils.createFrame(agentSelectionFrame, tk.TOP, anchor = tk.W)
+	ttk.Label(infectedCheckboxFrame, text="Infected : ", padding=(5, 5, 5, 5)).pack(side=tk.LEFT, anchor = tk.N)
+	infectedCheckbox = ttk.Checkbutton(infectedCheckboxFrame, variable=tk.IntVar())
+	infectedCheckbox.pack(side=tk.RIGHT)
+	infectedCheckbox.state(["selected"])
+
+	immuneCheckboxFrame = guiUtils.createFrame(agentSelectionFrame, tk.TOP, anchor = tk.W)
+	ttk.Label(immuneCheckboxFrame, text="Recovered : ", padding=(5, 5, 5, 5)).pack(side=tk.LEFT, anchor = tk.N)
+	immuneCheckbox = ttk.Checkbutton(immuneCheckboxFrame, variable=tk.IntVar())
+	immuneCheckbox.pack(side=tk.RIGHT)
+	immuneCheckbox.state(["selected"])
+
+	deadCheckboxFrame = guiUtils.createFrame(agentSelectionFrame, tk.TOP, anchor = tk.W)
+	ttk.Label(deadCheckboxFrame, text="Dead : ", padding=(5, 5, 5, 5)).pack(side=tk.LEFT, anchor = tk.N)
+	deadCheckbox = ttk.Checkbutton(deadCheckboxFrame, variable=tk.IntVar())
+	deadCheckbox.pack(side=tk.RIGHT)
+	deadCheckbox.state(["selected"])
+
+	timeFormatSelectionFrame = guiUtils.createFrame(mainGraphSelectFrame, tk.LEFT, padding=(5, 5, 5, 5), ipady=10, anchor = tk.N)
+	ttk.Label(timeFormatSelectionFrame, text="Time Format", font=("Helvetica", 10, "bold"), padding=(5, 5, 5, 5)).pack(side = tk.TOP, anchor = tk.N)
+	framesTimeType = ttk.Radiobutton(timeFormatSelectionFrame, text="Frames", variable=timeFormatVariable, value="frames")
+	framesTimeType.pack(anchor = tk.W)
+	secondsTimeType = ttk.Radiobutton(timeFormatSelectionFrame, text="Seconds (in-simulation)", variable=timeFormatVariable, value="seconds")
+	secondsTimeType.pack(anchor = tk.W)
+
+	def extractSelectedSimulations(simulationList):
+		selectedSimulations = []
+		for i in range(0, simulationList.size()):
+			if simulationList.selection_includes(i):
+				selectedSimulations.append(i)
+		
+		if selectedSimulations == []:
+			tkmb.showerror("Error", "No simulations were selected.")
+		return selectedSimulations
+
+	bottomFrame = guiUtils.createFrame(graphSelectWindow, tk.BOTTOM, padding=(5, 5, 5, 5))
+	ttk.Button(bottomFrame, text="Spawn", command=lambda: graph.generateGraph(dataTypeVariable.get(), graphTypeVariable.get(), extractSelectedSimulations(simulationSelectionList), {"Sane" : utilities.isChecked(saneCheckbox), "Infected" : utilities.isChecked(infectedCheckbox), "Immune" : utilities.isChecked(immuneCheckbox), "Dead" : utilities.isChecked(deadCheckbox)}, timeFormatVariable.get()), padding=(2, 2, 2, 2)).pack(side=tk.LEFT)
+	ttk.Button(bottomFrame, text="Cancel", command=graphSelectWindow.destroy, padding=(2, 2, 2, 2)).pack(side=tk.RIGHT)

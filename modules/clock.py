@@ -18,7 +18,7 @@ def clockThread():
 	sharedData.writeGlobalVar("frameTime", frameTime)
 
 	# We reset the collected data.
-	sharedData.resetTotalCounts()
+	sharedData.resetData()
 
 	while sharedData.getGlobalVar("isSimulationRunning"):
 		# Collect data for the counts.
@@ -29,7 +29,17 @@ def clockThread():
 
 		# Update the counts.
 		guiUtils.updateCounts(saneCount, infectedCount, immuneCount, deadCount)
-		sharedData.addTotalCount(saneCount, infectedCount, immuneCount, deadCount)
+		
+		# Update the counts in the data collection.
+		simulations = sharedData.getGlobalVar("simulations")
+		tempSimulationList = []
+		for indexOfSimulation in range(len(simulations)):
+			numberOfSaneAgents = len(simulations[indexOfSimulation]["saneAgents"])
+			numberOfInfectedAgents = len(simulations[indexOfSimulation]["infectedAgents"])
+			numberOfImmuneAgents = len(simulations[indexOfSimulation]["immuneAgents"])
+			numberOfDeadAgents = len(simulations[indexOfSimulation]["deadAgents"])
+			tempSimulationList.append({"Index": indexOfSimulation, "Sane":numberOfSaneAgents, "Infected":numberOfInfectedAgents, "Immune":numberOfImmuneAgents, "Dead":numberOfDeadAgents})
+		sharedData.addFrameCount(tempSimulationList)
 
 		# Update time
 		sharedData.getGlobalVar("interactiveGraphicalComponents")["timeLabel"].config(text="Frames : " + str(frameTime) + " | Time (in-simulation) : " + str(int(frameTime/framerate)) + "s")
@@ -46,3 +56,4 @@ def clockThread():
 
 		frameTime += 1
 		sharedData.writeGlobalVar("frameTime", frameTime)
+	print(sharedData.retrieveData())

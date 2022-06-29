@@ -51,6 +51,7 @@ def clearCanvasses(canvasRoot, windowRoot):
 
 	# We empty all the canvasses from the shared data.
 	sharedData.writeGlobalVar("simulations", None)
+	sharedData.resetData()
 
 	# We reset the counts
 	updateCounts(0,0,0,0)
