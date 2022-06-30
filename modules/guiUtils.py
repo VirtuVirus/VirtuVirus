@@ -29,11 +29,11 @@ def generateCanvasses(CanvasRoot, number, width, height, windowRoot, hasInfectiv
 			i = 0
 			j += 1
 		
-		canvasses.append({"simulationZone": canvas, "agents": [], "saneAgents": [], "infectedAgents": [], "immuneAgents": [], "deadAgents": [], "connectedThreads": [], "isInfectiveContainer": False})
+		canvasses.append({"simulationZone": canvas, "agents": [], "saneAgents": [], "infectedAgents": [], "immuneAgents": [], "deadAgents": [], "connectedThreads": [], "isQuarantine": False})
 	
 	if hasInfectiveContainer and number > 1:
 		canvas.config(highlightthickness=2, highlightbackground="red")
-		canvasses[-1]["isInfectiveContainer"] = True
+		canvasses[-1]["isQuarantine"] = True
 		
 	# Adapt minimal resolution of windowRoot
 	windowRoot.minsize(int(width*min(5, number)+200), max(int(height*j+55), defaultConfigVars.HEIGHT))
@@ -51,6 +51,7 @@ def clearCanvasses(canvasRoot, windowRoot):
 
 	# We empty all the canvasses from the shared data.
 	sharedData.writeGlobalVar("simulations", None)
+	sharedData.resetData()
 
 	# We reset the counts
 	updateCounts(0,0,0,0)

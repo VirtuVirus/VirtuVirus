@@ -39,3 +39,16 @@ def writeGlobalVar(varName, varValue):
 def getAllGlobalVars():
 	global globalVars
 	return globalVars
+
+# ----------------------------------------- Data collection ----------------------------------------- #
+collectedData = []
+
+def addFrameCount(frameSimulationsCounts):
+	collectedData.append(frameSimulationsCounts)
+
+def retrieveData():
+	return collectedData
+
+def resetData():
+	global collectedData
+	collectedData = []
