@@ -468,17 +468,14 @@ def showGraphSelectWindow(window_root):
 
 	dataTypeFrame = guiUtils.createFrame(mainGraphSelectFrame, tk.LEFT, padding=(5, 5, 5, 5), ipady=10, anchor = tk.N)
 	ttk.Label(dataTypeFrame, text="Data Type", font=("Helvetica", 10, "bold"), padding=(5, 5, 5, 5)).pack(side = tk.TOP, anchor = tk.N)
-	totalType = ttk.Radiobutton(dataTypeFrame, text="Total", variable=dataTypeVariable, value="total")
-	totalType.pack(anchor = tk.W)
-	meanType = ttk.Radiobutton(dataTypeFrame, text="Mean", variable=dataTypeVariable, value="mean")
-	meanType.pack(anchor = tk.W)
+	ttk.Radiobutton(dataTypeFrame, text="Total", variable=dataTypeVariable, value="total").pack(anchor = tk.W)
+	ttk.Radiobutton(dataTypeFrame, text="Mean", variable=dataTypeVariable, value="mean").pack(anchor = tk.W)
 
 	graphTypeSelectionFrame = guiUtils.createFrame(mainGraphSelectFrame, tk.LEFT, padding=(5, 5, 5, 5), ipady=10, anchor = tk.N)
 	ttk.Label(graphTypeSelectionFrame, text="Graph Type", font=("Helvetica", 10, "bold"), padding=(5, 5, 5, 5)).pack(side = tk.TOP, anchor = tk.N)
-	lineType = ttk.Radiobutton(graphTypeSelectionFrame, text="Line", variable=graphTypeVariable, value="line")
-	lineType.pack(anchor = tk.W)
-	barType = ttk.Radiobutton(graphTypeSelectionFrame, text="Bar", variable=graphTypeVariable, value="bar")
-	barType.pack(anchor = tk.W)
+	ttk.Radiobutton(graphTypeSelectionFrame, text="Lines", variable=graphTypeVariable, value="line").pack(anchor = tk.W)
+	ttk.Radiobutton(graphTypeSelectionFrame, text="Bars (heavy)", variable=graphTypeVariable, value="bar").pack(anchor = tk.W)
+	ttk.Radiobutton(graphTypeSelectionFrame, text="Sums", variable=graphTypeVariable, value="sum").pack(anchor = tk.W)
 
 	simulationSelectionFrame = guiUtils.createFrame(mainGraphSelectFrame, tk.LEFT, padding=(5, 5, 5, 5), ipady=10, anchor = tk.N)
 	simulationSelectionFrame.pack(side = tk.LEFT)
@@ -512,7 +509,7 @@ def showGraphSelectWindow(window_root):
 	infectedCheckbox.state(["selected"])
 
 	immuneCheckboxFrame = guiUtils.createFrame(agentSelectionFrame, tk.TOP, anchor = tk.W)
-	ttk.Label(immuneCheckboxFrame, text="Recovered : ", padding=(5, 5, 5, 5)).pack(side=tk.LEFT, anchor = tk.N)
+	ttk.Label(immuneCheckboxFrame, text="Immune : ", padding=(5, 5, 5, 5)).pack(side=tk.LEFT, anchor = tk.N)
 	immuneCheckbox = ttk.Checkbutton(immuneCheckboxFrame, variable=tk.IntVar())
 	immuneCheckbox.pack(side=tk.RIGHT)
 	immuneCheckbox.state(["selected"])
@@ -525,10 +522,8 @@ def showGraphSelectWindow(window_root):
 
 	timeFormatSelectionFrame = guiUtils.createFrame(mainGraphSelectFrame, tk.LEFT, padding=(5, 5, 5, 5), ipady=10, anchor = tk.N)
 	ttk.Label(timeFormatSelectionFrame, text="Time Format", font=("Helvetica", 10, "bold"), padding=(5, 5, 5, 5)).pack(side = tk.TOP, anchor = tk.N)
-	framesTimeType = ttk.Radiobutton(timeFormatSelectionFrame, text="Frames", variable=timeFormatVariable, value="frames")
-	framesTimeType.pack(anchor = tk.W)
-	secondsTimeType = ttk.Radiobutton(timeFormatSelectionFrame, text="Seconds (in-simulation)", variable=timeFormatVariable, value="seconds")
-	secondsTimeType.pack(anchor = tk.W)
+	ttk.Radiobutton(timeFormatSelectionFrame, text="Frames", variable=timeFormatVariable, value="frames").pack(anchor = tk.W)
+	ttk.Radiobutton(timeFormatSelectionFrame, text="Seconds (in-simulation)", variable=timeFormatVariable, value="seconds").pack(anchor = tk.W)
 
 	def extractSelectedSimulations(simulationList):
 		selectedSimulations = []
