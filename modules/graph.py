@@ -123,8 +123,8 @@ def generateGraph(dataType, graphType, selectedSimulations, selectedAgents, time
 			plt.ylabel("Population")
 			title = "Agent population"
 		case 'mean':
-			plt.ylabel("Mean of the populations")
-			title = "Mean of the populations"
+			plt.ylabel("Mean of the agent populations")
+			title = "Mean of the agent populations"
 	
 	match timeFormat:
 		case 'frames':

@@ -56,4 +56,3 @@ def clockThread():
 
 		frameTime += 1
 		sharedData.writeGlobalVar("frameTime", frameTime)
-	print(sharedData.retrieveData())

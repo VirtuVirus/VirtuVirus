@@ -536,5 +536,5 @@ def showGraphSelectWindow(window_root):
 		return selectedSimulations
 
 	bottomFrame = guiUtils.createFrame(graphSelectWindow, tk.BOTTOM, padding=(5, 5, 5, 5))
-	ttk.Button(bottomFrame, text="Spawn", command=lambda: graph.generateGraph(dataTypeVariable.get(), graphTypeVariable.get(), extractSelectedSimulations(simulationSelectionList), {"Sane" : utilities.isChecked(saneCheckbox), "Infected" : utilities.isChecked(infectedCheckbox), "Immune" : utilities.isChecked(immuneCheckbox), "Dead" : utilities.isChecked(deadCheckbox)}, timeFormatVariable.get()), padding=(2, 2, 2, 2)).pack(side=tk.LEFT)
-	ttk.Button(bottomFrame, text="Cancel", command=graphSelectWindow.destroy, padding=(2, 2, 2, 2)).pack(side=tk.RIGHT)
+	ttk.Button(bottomFrame, text="Generate", command=lambda: graph.generateGraph(dataTypeVariable.get(), graphTypeVariable.get(), extractSelectedSimulations(simulationSelectionList), {"Sane" : utilities.isChecked(saneCheckbox), "Infected" : utilities.isChecked(infectedCheckbox), "Immune" : utilities.isChecked(immuneCheckbox), "Dead" : utilities.isChecked(deadCheckbox)}, timeFormatVariable.get()), padding=(2, 2, 2, 2)).pack(side=tk.LEFT)
+	ttk.Button(bottomFrame, text="Close", command=graphSelectWindow.destroy, padding=(2, 2, 2, 2)).pack(side=tk.RIGHT)
