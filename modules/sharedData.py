@@ -24,6 +24,7 @@ def getVarInConfig(varName):
 # ----------------------------------------- Global Variables ----------------------------------------- #
 globalVars = {}
 globalVars["simulations"] = None
+globalVars["quarantine"] = None
 globalVars["isSimulationRunning"] = False
 globalVars["isSimulationPaused"] = False
 globalVars["frameTime"] = None

@@ -47,7 +47,7 @@ def createAgent(simulation, agentType):
 
 	return agent
 
-def moveAgent(agent, simulation):
+def moveAgent(agent, simulation, originSimulation = None):
 	maxSpeed = sharedData.getVarInConfig("maximumAgentSpeed")
 	canvas = simulation["simulationZone"]
 	isCentralTravelEnabled = sharedData.getVarInConfig("isCentralTravelEnabled")
@@ -96,7 +96,10 @@ def moveAgent(agent, simulation):
 					local_x_speed, local_y_speed = (canvasWidth/2 - CenterX)/framerate, (canvasHeight/2 - CenterY)/framerate
 					canvas.move(agent["2DModel"], local_x_speed, local_y_speed)
 
-					(AgentLeftPos, AgentTopPos, AgentRightPos, AgentBottomPos) = canvas.coords(agent["2DModel"])
+					try:
+						(AgentLeftPos, AgentTopPos, AgentRightPos, AgentBottomPos) = canvas.coords(agent["2DModel"])
+					except ValueError:
+						return
 					(CenterX, CenterY) = utilities.get2CenterCoordsFrom4Coords(AgentLeftPos, AgentTopPos, AgentRightPos, AgentBottomPos)
 					testCordX, testCordY = utilities.getCentralCenterCordsFromTopLeftCords(CenterX, CenterY)
 
@@ -118,7 +121,14 @@ def moveAgent(agent, simulation):
 					local_y_speed *= -1
 		# Make the agents bounce against the screen borders.
 		canvas.move(agent["2DModel"], local_x_speed, local_y_speed)
-		(leftPos, topPos, rightPos, bottomPos) = canvas.coords(agent["2DModel"])
+		try:
+			(leftPos, topPos, rightPos, bottomPos) = canvas.coords(agent["2DModel"])
+		except ValueError:
+			break
+			
+		# Send back into their original simulation if they're cured.
+		if simulation["isQuarantine"] == True and agent["type"] == "Immune":
+			moveAgentToOtherSimulation(agent, simulation, originSimulation)
 
 		if leftPos <= 0 or rightPos >= canvasWidth:
 			local_x_speed = -local_x_speed
@@ -134,6 +144,9 @@ def infectAgent(agent, simulation):
 	size = sharedData.getVarInConfig("agentSize")
 	infectiveRange = sharedData.getVarInConfig("infectiveRange")
 	infectionRisk = sharedData.getVarInConfig("infectionRisk")
+	quarantineTimer = 0
+	quarantineTimerLimit = sharedData.getVarInConfig("quarantineTimerLimit")
+	isQuarantineEnabled = sharedData.getVarInConfig("isLastSimulationQuarantine")
 	defaultRecoveryChance = sharedData.getVarInConfig("defaultRecoveryChance")
 	defaultRecoveryChanceProgress = sharedData.getVarInConfig("recoveryChanceProgress")
 	deathRisk = sharedData.getVarInConfig("deathRisk")
@@ -162,7 +175,10 @@ def infectAgent(agent, simulation):
 
 	while sharedData.getGlobalVar("isSimulationRunning") == True and agent["type"] == "Infected":
 		# Get cords of the agents and the agents' infectious zone.
-		(AgentLeftPos, AgentTopPos, AgentRightPos, AgentBottomPos) = canvas.coords(agent["2DModel"])
+		try:
+			(AgentLeftPos, AgentTopPos, AgentRightPos, AgentBottomPos) = canvas.coords(agent["2DModel"])
+		except ValueError:
+			break
 		(InfectLeftPos, InfectTopPos, InfectRightPos, InfectBottomPos) = canvas.coords(infectionZone)
 
 		# Get center cords
@@ -191,11 +207,15 @@ def infectAgent(agent, simulation):
 		localRecoveryChanceProgress += defaultRecoveryChanceProgress
 
 		# Low risk for the agent to die. If Human Logic is enabled, the risk gets higher with the number of infected people.
-		if (random.random() < deathRisk - localRecoveryChanceProgress/4) or (random.random() < deathRisk * len(simulation["infectedAgents"])/(len(simulation["saneAgents"])+len(simulation["immuneAgents"])+1) - localRecoveryChanceProgress/3 and doHumanLogic == True):
+		if (random.random() < deathRisk - localRecoveryChanceProgress/4) or (random.random() < deathRisk * len(simulation["infectedAgents"])/(len(simulation["saneAgents"])+len(simulation["immuneAgents"])+1) - localRecoveryChanceProgress/3 and doHumanLogic == True and simulation["isQuarantine"] == False):
 			canvas.delete(infectionZone)
 			agent["infectionZone"] = None
 			KillAgent(agent, simulation)
 			return
+		
+		quarantineTimer += 1/framerate
+		if simulation["isQuarantine"] == False and quarantineTimer >= quarantineTimerLimit and isQuarantineEnabled:
+			moveAgentToOtherSimulation(agent, simulation, sharedData.getGlobalVar("quarantine"))
 		
 		utilities.waitIfPaused()
 		time.sleep(1/framerate) # Needs syncing
@@ -238,4 +258,29 @@ def KillAgent(agent, simulation):
 	if agent in simulation["infectedAgents"]:
 		simulation["infectedAgents"].remove(agent)
 	
+	return
+
+def moveAgentToOtherSimulation(originAgent, originSimulation, destinationSimulation):
+	agentType = originAgent["type"]
+
+	if originAgent in originSimulation["saneAgents"]:
+		originSimulation["saneAgents"].remove(originAgent)
+	if originAgent in originSimulation["infectedAgents"]:
+		originSimulation["infectedAgents"].remove(originAgent)
+	if originAgent in originSimulation["immuneAgents"]:
+		originSimulation["immuneAgents"].remove(originAgent)
+	if originAgent in originSimulation["deadAgents"]:
+		originSimulation["deadAgents"].remove(originAgent)
+	
+	originSimulation["simulationZone"].delete(originAgent["2DModel"])
+	originSimulation["agents"].remove(originAgent)
+
+	originAgent = None
+
+	newAgent = createAgent(destinationSimulation, agentType)
+	if sharedData.getGlobalVar("isSimulationRunning") == True and newAgent["type"] != "Dead":
+		utilities.createThread(destinationSimulation["connectedThreads"], moveAgent, (newAgent, destinationSimulation, originSimulation))
+		if newAgent["type"] == "Infected":
+			utilities.createThread(destinationSimulation["connectedThreads"], infectAgent, (newAgent, destinationSimulation))
+		
 	return

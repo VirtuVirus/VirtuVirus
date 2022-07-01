@@ -246,6 +246,12 @@ def defineSettingsDialogBox(window_root):
 	enableHumanLogicCheckbox.pack(side=tk.RIGHT)
 	enableHumanLogicCheckbox.state(["selected"])
 
+	quarantineTimerLimitFrame = guiUtils.createFrame(agentBehaviorSettingsFrame, tk.TOP, anchor = tk.W)
+	ttk.Label(quarantineTimerLimitFrame, text="Time before quarantine isolation (seconds) : ", padding=(5, 5, 5, 5)).pack(side=tk.LEFT)
+	quarantineTimerLimitEntry = ttk.Entry(quarantineTimerLimitFrame, width=2)
+	quarantineTimerLimitEntry.pack(side=tk.RIGHT)
+	quarantineTimerLimitEntry.insert(0, "3")
+
 	# Virus
 	ttk.Label(mainSettingsFrame, text="Virus", padding=(5, 5, 5, 5), font=("Helvetica", 10, "bold")).pack(side=tk.TOP)
 	virusSettingsFrame = guiUtils.createFrame(mainSettingsFrame, tk.TOP, padding=(5, 5, 5, 5), ipady=10, anchor = tk.W)
@@ -290,6 +296,7 @@ def defineSettingsDialogBox(window_root):
 		config["canvasWidth"] = int(sizeEntryWidth.get())
 		config["canvasHeight"] = int(sizeEntryHeight.get())
 		config["isLastSimulationQuarantine"] = utilities.isChecked(makeLastSimulationQuarantineCheckbox)
+		config["quarantineTimerLimit"] = int(quarantineTimerLimitEntry.get())
 		config["numberOfSaneAgents"] = int(saneAgentCountEntry.get())
 		config["numberOfInfectedAgents"] = int(infectedAgentCountEntry.get())
 		config["numberOfImmuneAgents"] = int(immuneAgentCountEntry.get())
@@ -315,9 +322,13 @@ def defineSettingsDialogBox(window_root):
 		config["defaultRecoveryChance"] = min(max(config["defaultRecoveryChance"], 0), 100)
 		config["recoveryChanceProgress"] = min(max(config["recoveryChanceProgress"], 0), 100)
 		config["deathRisk"] = min(max(config["deathRisk"], 0), 100)
-		config["numberOfSaneAgents"] = max(config["numberOfSaneAgents"], 1)
+		config["numberOfSaneAgents"] = max(config["numberOfSaneAgents"], 0)
 		config["numberOfInfectedAgents"] = max(config["numberOfInfectedAgents"], 0)
 		config["numberOfImmuneAgents"] = max(config["numberOfImmuneAgents"], 0)
+		config["maximumAgentSpeed"] = max(config["maximumAgentSpeed"], 1)
+		config["agentSize"] = max(config["agentSize"], 1)
+		config["quarantineTimerLimit"] = max(config["quarantineTimerLimit"], 0)
+		config["centerRange"] = max(config["centerRange"], 0)
 
 		# We apply the necessary tweaks
 		config["centralTravelChance"] = config["centralTravelChance"] / 100

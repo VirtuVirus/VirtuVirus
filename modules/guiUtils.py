@@ -34,6 +34,7 @@ def generateCanvasses(CanvasRoot, number, width, height, windowRoot, hasInfectiv
 	if hasInfectiveContainer and number > 1:
 		canvas.config(highlightthickness=2, highlightbackground="red")
 		canvasses[-1]["isQuarantine"] = True
+		sharedData.writeGlobalVar("quarantine", canvasses[-1])
 		
 	# Adapt minimal resolution of windowRoot
 	windowRoot.minsize(int(width*min(5, number)+200), max(int(height*j+55), defaultConfigVars.HEIGHT))
