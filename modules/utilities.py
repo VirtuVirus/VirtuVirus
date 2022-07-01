@@ -17,7 +17,7 @@ def get2CenterCoordsFrom4Coords(leftPos, topPos, rightPos, bottomPos):
 	return ((leftPos+rightPos)/2, (topPos+bottomPos)/2)
 
 def getCentralCenterCordsFromTopLeftCords(CenterX, CenterY):
-	return (CenterX - defaultConfigVars.WIDTH/2, CenterY - defaultConfigVars.HEIGHT/2)
+	return (CenterX - sharedData.getVarInConfig("canvasWidth")/2, CenterY - sharedData.getVarInConfig("canvasHeight")/2)
 
 def isChecked(checkbox):
 	try:

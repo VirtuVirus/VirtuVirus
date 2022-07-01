@@ -19,6 +19,7 @@ config["maximumAgentSpeed"] =  48						# Speed of the agents.
 config["agentSize"] = 10										# Size of the agents.
 config["isCentralTravelEnabled"] = True
 config["centralTravelChance"] = 0.05						# Chance of the central behavior to be activated per second.
+config["makeCentralTravelObvious"] = True
 config["centerRange"] = 30						# Range of the central area the agents will try to get to.
 config["isHumanLogicEnabled"] = True							# Agents' actions will depend on the number of infected.
 

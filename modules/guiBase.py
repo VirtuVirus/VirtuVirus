@@ -229,6 +229,11 @@ def defineSettingsDialogBox(window_root):
 	centralBehaviorChanceEntry.pack(side=tk.RIGHT)
 	centralBehaviorChanceEntry.insert(0, "5")
 
+	obviousCentralTravelFrame = guiUtils.createFrame(agentBehaviorSettingsFrame, tk.TOP, anchor = tk.W)
+	ttk.Label(obviousCentralTravelFrame, text="Make central travel obvious : ", padding=(5, 5, 5, 5)).pack(side=tk.LEFT)
+	obviousCentralTravelCheckbox = ttk.Checkbutton(obviousCentralTravelFrame, variable=tk.IntVar())
+	obviousCentralTravelCheckbox.pack(side=tk.RIGHT)
+
 	centerRangeFrame = guiUtils.createFrame(agentBehaviorSettingsFrame, tk.TOP, anchor = tk.W)
 	ttk.Label(centerRangeFrame, text="Center range (pixels) : ", padding=(5, 5, 5, 5)).pack(side=tk.LEFT)
 	centerRangeEntry = ttk.Entry(centerRangeFrame, width=3)
@@ -293,6 +298,7 @@ def defineSettingsDialogBox(window_root):
 		config["isCentralTravelEnabled"] = utilities.isChecked(enableCentralTravelCheckbox)
 		config["centralTravelChance"] = int(centralBehaviorChanceEntry.get())
 		config["centerRange"] = int(centerRangeEntry.get())
+		config["makeCentralTravelObvious"] = utilities.isChecked(obviousCentralTravelCheckbox)
 		config["isHumanLogicEnabled"] = utilities.isChecked(enableHumanLogicCheckbox)
 		config["infectiveRange"] = int(infectiveRangeEntry.get())
 		config["infectionRisk"] = int(infectionChanceEntry.get())

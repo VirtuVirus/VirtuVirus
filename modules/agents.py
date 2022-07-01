@@ -57,6 +57,7 @@ def moveAgent(agent, simulation):
 	canvasWidth = sharedData.getVarInConfig("canvasWidth")
 	canvasHeight = sharedData.getVarInConfig("canvasHeight")
 	framerate = sharedData.getVarInConfig("framerate")
+	makeCentralTravelObvious = sharedData.getVarInConfig("makeCentralTravelObvious")
 
 	# Generate random starter movement
 	local_x_speed, local_y_speed = maxSpeed*random.random(), maxSpeed*random.random()
@@ -67,11 +68,7 @@ def moveAgent(agent, simulation):
 
 	time.sleep(0.5) # Doing that somehow prevents a problem where the agent doesn't move.
 
-	while sharedData.getGlobalVar("isSimulationRunning") == True and agent["type"] != "Dead":
-		# Prevent thread surviving
-		if False or agent not in simulation["agents"] or agent["type"] == "Dead" or sharedData.getGlobalVar("isSimulationRunning") == False or len(simulation["connectedThreads"]) == 0:
-			return
-
+	while sharedData.getGlobalVar("isSimulationRunning") == True and agent["type"] != "Dead" and agent in simulation["agents"] and len(simulation["connectedThreads"]) != 0 :
 		# Central Travel
 		if isCentralTravelEnabled == True:
 			centralTravelChanceTest = random.random()
@@ -82,7 +79,7 @@ def moveAgent(agent, simulation):
 					centralTravelChanceTest *= 3
 				# If there are lots of infected, we make the requirement more strict.
 				if agent["type"] == "Sane":
-					centralTravelChance *= (len(simulation["agents"]) - len(simulation["infectedAgents"])+len(simulation["deadAgents"])*3)/len(simulation["agents"])
+					centralTravelChanceTest /= 1 - (len(simulation["infectedAgents"]) - len(simulation["deadAgents"])*3)/len(simulation["agents"])
 			
 			if centralTravelChanceTest <= centralTravelChance:
 				(AgentLeftPos, AgentTopPos, AgentRightPos, AgentBottomPos) = canvas.coords(agent["2DModel"])
@@ -90,7 +87,11 @@ def moveAgent(agent, simulation):
 
 				testCordX, testCordY = utilities.getCentralCenterCordsFromTopLeftCords(CenterX, CenterY)
 
-				while sharedData.getGlobalVar("isSimulationRunning") == False and sqrt(testCordX**2 + testCordY**2) > centerRange:
+				if makeCentralTravelObvious:
+					oldColor = canvas.itemcget(agent["2DModel"], "fill")
+					canvas.itemconfig(agent["2DModel"], fill="yellow")
+
+				while sharedData.getGlobalVar("isSimulationRunning") == True and sqrt(testCordX**2 + testCordY**2) > centerRange:
 					# Go to center
 					local_x_speed, local_y_speed = (canvasWidth/2 - CenterX)/framerate, (canvasHeight/2 - CenterY)/framerate
 					canvas.move(agent["2DModel"], local_x_speed, local_y_speed)
@@ -101,7 +102,13 @@ def moveAgent(agent, simulation):
 
 					if False or agent not in simulation["agents"] or agent["type"] == "Dead" or sharedData.getGlobalVar("isSimulationRunning") == False or len(simulation["connectedThreads"]) == 0:
 						return
+					
+					utilities.waitIfPaused()
 					time.sleep(1/framerate) # Needs syncing
+				
+				if makeCentralTravelObvious:
+					if canvas.itemcget(agent["2DModel"], "fill") == "yellow":
+						canvas.itemconfig(agent["2DModel"], fill=oldColor)
 				
 				# Regenerate starter movement
 				local_x_speed, local_y_speed = maxSpeed*random.random(), maxSpeed*random.random()
@@ -184,7 +191,7 @@ def infectAgent(agent, simulation):
 		localRecoveryChanceProgress += defaultRecoveryChanceProgress
 
 		# Low risk for the agent to die. If Human Logic is enabled, the risk gets higher with the number of infected people.
-		if (random.random() < deathRisk - localRecoveryChanceProgress/4) or (random.random() < deathRisk * len(simulation["infectedAgents"])/(len(simulation["saneAgents"])+len(simulation["immuneAgents"])) - localRecoveryChanceProgress/4 and doHumanLogic == True):
+		if (random.random() < deathRisk - localRecoveryChanceProgress/4) or (random.random() < deathRisk * len(simulation["infectedAgents"])/(len(simulation["saneAgents"])+len(simulation["immuneAgents"])+1) - localRecoveryChanceProgress/3 and doHumanLogic == True):
 			canvas.delete(infectionZone)
 			agent["infectionZone"] = None
 			KillAgent(agent, simulation)
