@@ -58,13 +58,18 @@ def generateGraph(dataType, graphType, selectedSimulations, selectedAgents, time
 			tempImmuneVar = 0
 			tempDeadVar = 0
 			try:
+				altDivider = 0
 				for j in range(i,i+framerate):
 					tempSaneVar += saneData[j]/framerate
 					tempInfectedVar += infectedData[j]/framerate
 					tempImmuneVar += immuneData[j]/framerate
 					tempDeadVar += deadData[j]/framerate
+					altDivider += 1
 			except IndexError:
-				pass
+				tempSaneVar *= framerate/altDivider
+				tempInfectedVar *= framerate/altDivider
+				tempImmuneVar *= framerate/altDivider
+				tempDeadVar *= framerate/altDivider
 			tempSaneData.append(tempSaneVar)
 			tempInfectedData.append(tempInfectedVar)
 			tempImmuneData.append(tempImmuneVar)
