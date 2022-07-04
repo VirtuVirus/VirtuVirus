@@ -37,7 +37,10 @@ def defineGUI():
 
 	# Set icon
 	if "win" in platform:
-		root.wm_iconbitmap(default="assets/icon.ico")
+		try:
+			root.wm_iconbitmap(default="assets/icon.ico")
+		except:
+			print("An error occured while setting the icon.")
 	else:
 		img = tk.PhotoImage(file='assets/icon.png')
 		root.tk.call('wm', 'iconphoto', root._w, img)
@@ -140,7 +143,10 @@ def defineSettingsDialogBox(window_root):
 
 	# Set icon
 	if "win" in platform:
-		settingsDialogBox.wm_iconbitmap(default="assets/icon.ico")
+		try:
+			settingsDialogBox.wm_iconbitmap(default="assets/icon.ico")
+		except:
+			print("An error occured while setting the icon.")
 	else:
 		img = tk.PhotoImage(file='assets/icon.png')
 		settingsDialogBox.tk.call('wm', 'iconphoto', settingsDialogBox._w, img)
@@ -485,7 +491,10 @@ def showGraphSelectWindow(window_root):
 
 	# Set icon
 	if "win" in platform:
-		graphSelectWindow.wm_iconbitmap(default="assets/icon.ico")
+		try:
+			graphSelectWindow.wm_iconbitmap(default="assets/icon.ico")
+		except:
+			print("An error occured while setting the icon.")
 	else:
 		img = tk.PhotoImage(file='assets/icon.png')
 		graphSelectWindow.tk.call('wm', 'iconphoto', graphSelectWindow._w, img)
