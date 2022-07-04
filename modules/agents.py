@@ -188,15 +188,16 @@ def infectAgent(agent, simulation):
 		# Move agent_infectious_zone to the agent's position
 		canvas.move(infectionZone, AgentCenterX-InfectCenterX, AgentCenterY-InfectCenterY)
 
-		# Infect overlapping agents
-		overlappingAgentModels = canvas.find_overlapping(InfectLeftPos, InfectTopPos, InfectRightPos, InfectBottomPos)
-		for overlappingAgentModel in overlappingAgentModels:
-			if overlappingAgentModel != agent["2DModel"] and overlappingAgentModel != infectionZone:
-				if random.random() < infectionRisk: # Give them a chance to escape unharmed.
-					# We try and locate a sane agent that owns the model.
-					for newAgent in simulation["saneAgents"]:
-						if newAgent["2DModel"] == overlappingAgentModel and newAgent["type"] == "Sane":
-							utilities.createThread(simulation["connectedThreads"], infectAgent, (newAgent,simulation))
+		# Infect overlapping agents, unless in quarantine.
+		if simulation["isQuarantine"] == False:
+			overlappingAgentModels = canvas.find_overlapping(InfectLeftPos, InfectTopPos, InfectRightPos, InfectBottomPos)
+			for overlappingAgentModel in overlappingAgentModels:
+				if overlappingAgentModel != agent["2DModel"] and overlappingAgentModel != infectionZone:
+					if random.random() < infectionRisk: # Give them a chance to escape unharmed.
+						# We try and locate a sane agent that owns the model.
+						for newAgent in simulation["saneAgents"]:
+							if newAgent["2DModel"] == overlappingAgentModel and newAgent["type"] == "Sane":
+								utilities.createThread(simulation["connectedThreads"], infectAgent, (newAgent,simulation))
 		
 		# Very low chance for the agent to be immunized, that progressively increases.
 		if random.random() < defaultRecoveryChance + localRecoveryChanceProgress:
