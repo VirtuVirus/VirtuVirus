@@ -17,10 +17,12 @@ def createAgents(simulations, saneQuantity, infectedQuantity, immuneQuantity):
 			for i in range(immuneQuantity):
 				createAgent(simulation, "Immune")
 
-def createAgent(simulation, agentType):
+def createAgent(simulation, agentType, forceSymptomlessStatus = None):
 	size = sharedData.getVarInConfig("agentSize")
 	width = sharedData.getVarInConfig("canvasWidth")
 	height = sharedData.getVarInConfig("canvasHeight")
+	enableSymptomlessAgents = sharedData.getVarInConfig("enableSymptomlessAgents")
+	SymptomlessChance = sharedData.getVarInConfig("symptomlessAgentsChance")
 
 	# Randomly place the agent.
 	x_position, y_position = random.randint(0, width), random.randint(0, height)
@@ -30,6 +32,13 @@ def createAgent(simulation, agentType):
 
 	agent["type"] = None
 	agent["infectionZone"] = None
+	agent["isSymptomless"] = False
+	# Give agent a chance to be symptomless.
+	if enableSymptomlessAgents == True and forceSymptomlessStatus == None:
+		if random.random() <= SymptomlessChance:
+			agent["isSymptomless"] = True
+	elif forceSymptomlessStatus == True:
+		agent["isSymptomless"] = True
 
 	match agentType:
 		case "Sane":
@@ -37,7 +46,10 @@ def createAgent(simulation, agentType):
 			agent["type"] = "Sane"
 			simulation["saneAgents"].append(agent)
 		case "Infected":
-			simulation["simulationZone"].itemconfig(agent["2DModel"], fill="red")
+			if agent["isSymptomless"]:
+				simulation["simulationZone"].itemconfig(agent["2DModel"], fill="pink")
+			else:
+				simulation["simulationZone"].itemconfig(agent["2DModel"], fill="red")
 			agent["type"] = "Infected"
 			simulation["infectedAgents"].append(agent)
 		case "Immune":
@@ -120,7 +132,10 @@ def moveAgent(agent, simulation, originSimulation = None):
 				if random.randint(0, 1) == 1:
 					local_y_speed *= -1
 		# Make the agents bounce against the screen borders.
-		canvas.move(agent["2DModel"], local_x_speed, local_y_speed)
+		try:
+			canvas.move(agent["2DModel"], local_x_speed, local_y_speed)
+		except:
+			break
 		try:
 			(leftPos, topPos, rightPos, bottomPos) = canvas.coords(agent["2DModel"])
 		except ValueError:
@@ -164,7 +179,10 @@ def infectAgent(agent, simulation):
 	if agent in simulation["saneAgents"]:
 		simulation["saneAgents"].remove(agent)
 
-	simulation["simulationZone"].itemconfig(agent["2DModel"], fill="red")
+	if agent["isSymptomless"]:
+		simulation["simulationZone"].itemconfig(agent["2DModel"], fill="pink")
+	else:
+		simulation["simulationZone"].itemconfig(agent["2DModel"], fill="red")
 
 	# We create the infectious zone and append it.
 	infectionZone = canvas.create_oval(0, 0, 0+(size*infectiveRange), 0+(size*infectiveRange))
@@ -208,14 +226,14 @@ def infectAgent(agent, simulation):
 		localRecoveryChanceProgress += defaultRecoveryChanceProgress
 
 		# Low risk for the agent to die. If Human Logic is enabled, the risk gets higher with the number of infected people.
-		if (random.random() < deathRisk - localRecoveryChanceProgress/4) or (random.random() < deathRisk * len(simulation["infectedAgents"])/(len(simulation["saneAgents"])+len(simulation["immuneAgents"])+1) - localRecoveryChanceProgress/3 and doHumanLogic == True and simulation["isQuarantine"] == False):
+		if agent["isSymptomless"] == False and ((random.random() < deathRisk - localRecoveryChanceProgress/4) or (random.random() < deathRisk * len(simulation["infectedAgents"])/(len(simulation["saneAgents"])+len(simulation["immuneAgents"])+1) - localRecoveryChanceProgress/3 and doHumanLogic == True and simulation["isQuarantine"] == False)):
 			canvas.delete(infectionZone)
 			agent["infectionZone"] = None
 			KillAgent(agent, simulation)
 			return
 		
 		quarantineTimer += 1/framerate
-		if simulation["isQuarantine"] == False and quarantineTimer >= quarantineTimerLimit and isQuarantineEnabled:
+		if simulation["isQuarantine"] == False and quarantineTimer >= quarantineTimerLimit and isQuarantineEnabled and agent["isSymptomless"] == False:
 			moveAgentToOtherSimulation(agent, simulation, sharedData.getGlobalVar("quarantine"))
 		
 		utilities.waitIfPaused()
@@ -274,11 +292,18 @@ def moveAgentToOtherSimulation(originAgent, originSimulation, destinationSimulat
 		originSimulation["deadAgents"].remove(originAgent)
 	
 	originSimulation["simulationZone"].delete(originAgent["2DModel"])
-	originSimulation["agents"].remove(originAgent)
+	try:
+		originSimulation["agents"].remove(originAgent)
+	except ValueError:
+		print("[Handled] Agent from origin simulation not present in its agents. This shouldn't happen ?!?")
 
+	if originAgent["isSymptomless"] == False:
+		newAgent = createAgent(destinationSimulation, agentType, False)
+	elif originAgent["isSymptomless"] == True:
+		newAgent = createAgent(destinationSimulation, agentType, True)
+	
 	originAgent = None
-
-	newAgent = createAgent(destinationSimulation, agentType)
+	
 	if sharedData.getGlobalVar("isSimulationRunning") == True and newAgent["type"] != "Dead":
 		utilities.createThread(destinationSimulation["connectedThreads"], moveAgent, (newAgent, destinationSimulation, originSimulation))
 		if newAgent["type"] == "Infected":

@@ -23,6 +23,8 @@ config["makeCentralTravelObvious"] = True
 config["centerRange"] = 30						# Range of the central area the agents will try to get to.
 config["quarantineTimerLimit"] = 3
 config["isHumanLogicEnabled"] = True							# Agents' actions will depend on the number of infected.
+config["enableSymptomlessAgents"] = True
+config["symptomlessAgentsChance"] = 1/30						# Chance of a symptomless agent to be created.
 
 # Virus
 config["infectiveRange"] = 4								# Range of infection is defined by the size multiplied by this number.

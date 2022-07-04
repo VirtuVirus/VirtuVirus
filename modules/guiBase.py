@@ -213,6 +213,18 @@ def defineSettingsDialogBox(window_root):
 	agentSizeEntry.pack(side=tk.RIGHT)
 	agentSizeEntry.insert(0, "10")
 
+	enableSymptomlessAgentsFrame = guiUtils.createFrame(agentSettingsFrame, tk.TOP, anchor = tk.W)
+	ttk.Label(enableSymptomlessAgentsFrame, text="Enable symtomless agents : ", padding=(5, 5, 5, 5)).pack(side=tk.LEFT)
+	enableSymptomlessAgentsCheckbox = ttk.Checkbutton(enableSymptomlessAgentsFrame, variable=tk.IntVar())
+	enableSymptomlessAgentsCheckbox.pack(side=tk.RIGHT)
+	enableSymptomlessAgentsCheckbox.state(["selected"])
+
+	symptomlessAgentsChanceFrame = guiUtils.createFrame(agentSettingsFrame, tk.TOP, anchor = tk.W)
+	ttk.Label(symptomlessAgentsChanceFrame, text="Chance of symptomless agents (0-100) : ", padding=(5, 5, 5, 5)).pack(side=tk.LEFT)
+	symptomlessAgentsChanceEntry = ttk.Entry(symptomlessAgentsChanceFrame, width=3)
+	symptomlessAgentsChanceEntry.pack(side=tk.RIGHT)
+	symptomlessAgentsChanceEntry.insert(0, "3")
+
 	# Agents behavior
 	ttk.Label(mainSettingsFrame, text="Behaviors", padding=(5, 5, 5, 5), font=("Helvetica", 10, "bold")).pack(side=tk.TOP)
 	agentBehaviorSettingsFrame = guiUtils.createFrame(mainSettingsFrame, tk.TOP, padding=(5, 5, 5, 5), ipady=10, anchor = tk.W)
@@ -312,6 +324,8 @@ def defineSettingsDialogBox(window_root):
 		config["defaultRecoveryChance"] = int(defaultRecoveryChanceEntry.get())
 		config["recoveryChanceProgress"] = int(recoveryChanceProgressEntry.get())
 		config["deathRisk"] = int(deathRiskEntry.get())
+		config["enableSymptomlessAgents"] = utilities.isChecked(enableSymptomlessAgentsCheckbox)
+		config["symptomlessAgentsChance"] = int(symptomlessAgentsChanceEntry.get())
 
 		# We apply the limits
 		config["simulationQuantity"] = min(max(config["simulationQuantity"], 1),15)
@@ -329,6 +343,7 @@ def defineSettingsDialogBox(window_root):
 		config["agentSize"] = max(config["agentSize"], 1)
 		config["quarantineTimerLimit"] = max(config["quarantineTimerLimit"], 0)
 		config["centerRange"] = max(config["centerRange"], 0)
+		config["symptomlessAgentsChance"] = min(max(config["symptomlessAgentsChance"], 0), 100)
 
 		# We apply the necessary tweaks
 		config["centralTravelChance"] = config["centralTravelChance"] / 100
@@ -336,6 +351,7 @@ def defineSettingsDialogBox(window_root):
 		config["defaultRecoveryChance"] = config["defaultRecoveryChance"] / 100 / 10
 		config["recoveryChanceProgress"] = config["recoveryChanceProgress"] / 100 / 1000
 		config["deathRisk"] = config["deathRisk"] / 100 / 10
+		config["symptomlessAgentsChance"] = config["symptomlessAgentsChance"] / 100
 
 		# We adapt to the framerate where necessary
 		config["maximumAgentSpeed"] /= config["framerate"]
