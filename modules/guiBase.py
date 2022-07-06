@@ -151,11 +151,11 @@ def defineSettingsDialogBox(window_root):
 		img = tk.PhotoImage(file='assets/icon.png')
 		settingsDialogBox.tk.call('wm', 'iconphoto', settingsDialogBox._w, img)
 	
-	mainSettingsFrame = guiUtils.createFrame(settingsDialogBox, tk.LEFT, fill="both", expand=True)
+	mainSettingsFrame = guiUtils.createFrame(settingsDialogBox, tk.TOP, fill="both", expand=True)
 
 	# Simulation
-	ttk.Label(mainSettingsFrame, text="Simulation", padding=(5, 5, 5, 5), font=("Helvetica", 10, "bold")).pack(side=tk.TOP)
-	simulationSettingsFrame = guiUtils.createFrame(mainSettingsFrame, tk.TOP, padding=(5, 5, 5, 5), ipady=10, anchor = tk.W)
+	simulationSettingsFrame = guiUtils.createFrame(mainSettingsFrame, tk.LEFT, padding=(5, 5, 5, 5), ipady=10, anchor = tk.N)
+	ttk.Label(simulationSettingsFrame, text="Simulation", padding=(5, 5, 5, 5), font=("Helvetica", 10, "bold")).pack(side=tk.TOP)
 
 	NumberOfSimulationsFrame = guiUtils.createFrame(simulationSettingsFrame, tk.TOP, anchor = tk.W)
 	ttk.Label(NumberOfSimulationsFrame, text="Number of simulations (1-15) : ", padding=(5, 5, 5, 5)).pack(side=tk.LEFT)
@@ -180,14 +180,14 @@ def defineSettingsDialogBox(window_root):
 	sizeEntryHeight.insert(0, "300")
 
 	makeLastSimulationQuarantineFrame = guiUtils.createFrame(simulationSettingsFrame, tk.TOP, anchor = tk.W)
-	ttk.Label(makeLastSimulationQuarantineFrame, text="Make last simulation quarantine : ", padding=(5, 5, 5, 5)).pack(side=tk.LEFT)
+	ttk.Label(makeLastSimulationQuarantineFrame, text="Make last simulation quarantine :", padding=(5, 5, 5, 5)).pack(side=tk.LEFT)
 	makeLastSimulationQuarantineCheckbox = ttk.Checkbutton(makeLastSimulationQuarantineFrame, variable=tk.IntVar())
 	makeLastSimulationQuarantineCheckbox.pack(side=tk.RIGHT)
 	makeLastSimulationQuarantineCheckbox.state(["selected"])
 
 	# Agents
-	ttk.Label(mainSettingsFrame, text="Agents", padding=(5, 5, 5, 5), font=("Helvetica", 10, "bold")).pack(side=tk.TOP)
-	agentSettingsFrame = guiUtils.createFrame(mainSettingsFrame, tk.TOP, padding=(5, 5, 5, 5), ipady=10, anchor = tk.W)
+	agentSettingsFrame = guiUtils.createFrame(mainSettingsFrame, tk.LEFT, padding=(5, 5, 5, 5), ipady=10, anchor = tk.N)
+	ttk.Label(agentSettingsFrame, text="Agents", padding=(5, 5, 5, 5), font=("Helvetica", 10, "bold")).pack(side=tk.TOP)
 
 	numberOfSaneAgentsFrame = guiUtils.createFrame(agentSettingsFrame, tk.TOP, anchor = tk.W)
 	ttk.Label(numberOfSaneAgentsFrame, text="Sane agents per simulation : ", padding=(5, 5, 5, 5)).pack(side=tk.LEFT)
@@ -220,7 +220,7 @@ def defineSettingsDialogBox(window_root):
 	agentSizeEntry.insert(0, "10")
 
 	enableSymptomlessAgentsFrame = guiUtils.createFrame(agentSettingsFrame, tk.TOP, anchor = tk.W)
-	ttk.Label(enableSymptomlessAgentsFrame, text="Enable symtomless agents : ", padding=(5, 5, 5, 5)).pack(side=tk.LEFT)
+	ttk.Label(enableSymptomlessAgentsFrame, text="Enable symtomless agents :", padding=(5, 5, 5, 5)).pack(side=tk.LEFT)
 	enableSymptomlessAgentsCheckbox = ttk.Checkbutton(enableSymptomlessAgentsFrame, variable=tk.IntVar())
 	enableSymptomlessAgentsCheckbox.pack(side=tk.RIGHT)
 	enableSymptomlessAgentsCheckbox.state(["selected"])
@@ -232,11 +232,11 @@ def defineSettingsDialogBox(window_root):
 	symptomlessAgentsChanceEntry.insert(0, "3")
 
 	# Agents behavior
-	ttk.Label(mainSettingsFrame, text="Behaviors", padding=(5, 5, 5, 5), font=("Helvetica", 10, "bold")).pack(side=tk.TOP)
-	agentBehaviorSettingsFrame = guiUtils.createFrame(mainSettingsFrame, tk.TOP, padding=(5, 5, 5, 5), ipady=10, anchor = tk.W)
+	agentBehaviorSettingsFrame = guiUtils.createFrame(mainSettingsFrame, tk.LEFT, padding=(5, 5, 5, 5), ipady=10, anchor = tk.N)
+	ttk.Label(agentBehaviorSettingsFrame, text="Behaviors", padding=(5, 5, 5, 5), font=("Helvetica", 10, "bold")).pack(side=tk.TOP)
 
 	enableCentralTravelFrame = guiUtils.createFrame(agentBehaviorSettingsFrame, tk.TOP, anchor = tk.W)
-	ttk.Label(enableCentralTravelFrame, text="Enable central travel : ", padding=(5, 5, 5, 5)).pack(side=tk.LEFT)
+	ttk.Label(enableCentralTravelFrame, text="Enable central travel :", padding=(5, 5, 5, 5)).pack(side=tk.LEFT)
 	enableCentralTravelCheckbox = ttk.Checkbutton(enableCentralTravelFrame, variable=tk.IntVar())
 	enableCentralTravelCheckbox.pack(side=tk.RIGHT)
 	enableCentralTravelCheckbox.state(["selected"])  # Solution for ttk not having select() function.
@@ -259,7 +259,7 @@ def defineSettingsDialogBox(window_root):
 	centerRangeEntry.insert(0, "30")
 
 	enableHumanLogicFrame = guiUtils.createFrame(agentBehaviorSettingsFrame, tk.TOP, anchor = tk.W)
-	ttk.Label(enableHumanLogicFrame, text="Enable human logic : ", padding=(5, 5, 5, 5)).pack(side=tk.LEFT)
+	ttk.Label(enableHumanLogicFrame, text="Enable human logic :", padding=(5, 5, 5, 5)).pack(side=tk.LEFT)
 	enableHumanLogicCheckbox = ttk.Checkbutton(enableHumanLogicFrame, variable=tk.IntVar())
 	enableHumanLogicCheckbox.pack(side=tk.RIGHT)
 	enableHumanLogicCheckbox.state(["selected"])
@@ -271,8 +271,8 @@ def defineSettingsDialogBox(window_root):
 	quarantineTimerLimitEntry.insert(0, "3")
 
 	# Virus
-	ttk.Label(mainSettingsFrame, text="Virus", padding=(5, 5, 5, 5), font=("Helvetica", 10, "bold")).pack(side=tk.TOP)
-	virusSettingsFrame = guiUtils.createFrame(mainSettingsFrame, tk.TOP, padding=(5, 5, 5, 5), ipady=10, anchor = tk.W)
+	virusSettingsFrame = guiUtils.createFrame(mainSettingsFrame, tk.LEFT, padding=(5, 5, 5, 5), ipady=10, anchor = tk.N)
+	ttk.Label(virusSettingsFrame, text="Virus", padding=(5, 5, 5, 5), font=("Helvetica", 10, "bold")).pack(side=tk.TOP)
 
 	infectiveRangeFrame = guiUtils.createFrame(virusSettingsFrame, tk.TOP, anchor = tk.W)
 	ttk.Label(infectiveRangeFrame, text="Infective range : ", padding=(5, 5, 5, 5)).pack(side=tk.LEFT)
@@ -287,7 +287,7 @@ def defineSettingsDialogBox(window_root):
 	infectionChanceEntry.insert(0, "48")
 
 	defaultRecoveryChanceFrame = guiUtils.createFrame(virusSettingsFrame, tk.TOP, anchor = tk.W)
-	ttk.Label(defaultRecoveryChanceFrame, text="Default recovery chance per second (0-100)/10 : ", padding=(5, 5, 5, 5)).pack(side=tk.LEFT)
+	ttk.Label(defaultRecoveryChanceFrame, text="Default recovery chance per second (0-100)/10 :", padding=(5, 5, 5, 5)).pack(side=tk.LEFT)
 	defaultRecoveryChanceEntry = ttk.Entry(defaultRecoveryChanceFrame, width=3)
 	defaultRecoveryChanceEntry.pack(side=tk.RIGHT)
 	defaultRecoveryChanceEntry.insert(0, "24")
@@ -379,7 +379,7 @@ def defineSettingsDialogBox(window_root):
 		return config
 	
 	# Bottom frame
-	bottomFrame = guiUtils.createFrame(mainSettingsFrame, tk.BOTTOM, padding=(5, 5, 5, 5))
+	bottomFrame = guiUtils.createFrame(settingsDialogBox, tk.BOTTOM, padding=(5, 5, 5, 5))
 	ttk.Button(bottomFrame, text="Spawn", command=lambda: spawnSimulations(generateConfigFromEntries()), padding=(2, 2, 2, 2)).pack(side=tk.LEFT)
 	ttk.Button(bottomFrame, text="Cancel", command=settingsDialogBox.destroy, padding=(2, 2, 2, 2)).pack(side=tk.RIGHT)
 
