@@ -17,6 +17,14 @@ from modules import graph
 # Dev Vars
 enableDebugButtons = False
 
+# Path
+import sys, os
+if getattr(sys, 'frozen', False):
+		application_path = os.path.dirname(sys.executable)
+elif __file__:
+		application_path = os.path.dirname(__file__)
+		application_path = os.path.abspath(os.path.join(application_path, os.pardir))
+
 def defineGUI():
 	try:
 		root = tk.Tk()
@@ -38,11 +46,11 @@ def defineGUI():
 	# Set icon
 	if "win" in platform:
 		try:
-			root.wm_iconbitmap(default="assets/icon.ico")
+			root.wm_iconbitmap(default=application_path+"/assets/icon.ico")
 		except:
 			print("An error occured while setting the icon.")
 	else:
-		img = tk.PhotoImage(file='assets/icon.png')
+		img = tk.PhotoImage(file=application_path+'/assets/icon.png')
 		root.tk.call('wm', 'iconphoto', root._w, img)
 
 	# and theme
@@ -66,7 +74,7 @@ def defineGUI():
 	controlZone = guiUtils.createFrame(topZone, tk.LEFT)
 
 	# Add VirtuVirus Logo on top
-	logoFile = Image.open("assets/icon.png")
+	logoFile = Image.open(application_path+"/assets/icon.png")
 	logoFile = logoFile.resize((int(defaultConfigVars.WIDTH/5.2), int(defaultConfigVars.HEIGHT/4)), Image.ANTIALIAS)
 	logoFile = ImageTk.PhotoImage(logoFile)
 	logoLabel = tk.Label(controlZone, image=logoFile)
@@ -144,11 +152,11 @@ def defineSettingsDialogBox(window_root):
 	# Set icon
 	if "win" in platform:
 		try:
-			settingsDialogBox.wm_iconbitmap(default="assets/icon.ico")
+			settingsDialogBox.wm_iconbitmap(default=application_path+"/assets/icon.ico")
 		except:
 			print("An error occured while setting the icon.")
 	else:
-		img = tk.PhotoImage(file='assets/icon.png')
+		img = tk.PhotoImage(file=application_path+'/assets/icon.png')
 		settingsDialogBox.tk.call('wm', 'iconphoto', settingsDialogBox._w, img)
 	
 	mainSettingsFrame = guiUtils.createFrame(settingsDialogBox, tk.TOP, fill="both", expand=True)
@@ -492,11 +500,11 @@ def showGraphSelectWindow(window_root):
 	# Set icon
 	if "win" in platform:
 		try:
-			graphSelectWindow.wm_iconbitmap(default="assets/icon.ico")
+			graphSelectWindow.wm_iconbitmap(default=application_path+"/assets/icon.ico")
 		except:
 			print("An error occured while setting the icon.")
 	else:
-		img = tk.PhotoImage(file='assets/icon.png')
+		img = tk.PhotoImage(file=application_path+'assets/icon.png')
 		graphSelectWindow.tk.call('wm', 'iconphoto', graphSelectWindow._w, img)
 
 	# Variables
