@@ -27,6 +27,7 @@ jobs:
           --standalone 
           --onefile 
           --linux-onefile-icon=assets/icon.png 
+          --enable-plugin=tk-inter 
           VirtuVirus.py
     - name: Extract current branch name
       shell: bash
@@ -68,6 +69,7 @@ jobs:
           --onefile 
           --windows-disable-console 
           --windows-icon-from-ico=assets/icon.ico 
+          --enable-plugin=tk-inter 
           VirtuVirus.py
     - name: Extract current branch name
       shell: bash
