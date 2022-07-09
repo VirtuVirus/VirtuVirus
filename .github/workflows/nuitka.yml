@@ -19,8 +19,15 @@ jobs:
       run: pip install -r requirements.txt
     - name: Install Nuitka
       run: pip install Nuitka
+    - name: Grab VirtuVirus Build Cache
+      id: cache-virtuvirus-nuitka
+      uses: actions/cache@v3
+      with:
+        path: VirtuVirus.build
+        key: ${{ runner.os }}-virtuvirus-nuitka
     - name: Package with Nuitka
-      run: python3 -m nuitka --lto=yes 
+      run: python3 -m nuitka 
+          --include-data-dir=assets=assets 
           --clang 
           --include-package=PIL._tkinter_finder 
           --assume-yes-for-downloads 
@@ -59,9 +66,15 @@ jobs:
       run: pip install -r requirements.txt
     - name: Install Nuitka
       run: pip install Nuitka
+    - name: Grab VirtuVirus Build Cache
+      id: cache-virtuvirus-nuitka
+      uses: actions/cache@v3
+      with:
+        path: VirtuVirus.build
+        key: ${{ runner.os }}-virtuvirus-nuitka
     - name: Package with Nuitka
       run: python3 -m nuitka
-          --lto=yes 
+          --include-data-dir=assets=assets 
           --clang 
           --include-package=PIL._tkinter_finder 
           --assume-yes-for-downloads 

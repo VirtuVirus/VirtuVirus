@@ -1,6 +1,6 @@
 # External Imports
-import matplotlib
-matplotlib.use('TkAgg')
+from matplotlib import use as mpl_use
+mpl_use('TkAgg')
 import matplotlib.pyplot as plt
 
 # Internal Imports

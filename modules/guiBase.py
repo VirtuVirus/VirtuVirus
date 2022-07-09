@@ -504,7 +504,7 @@ def showGraphSelectWindow(window_root):
 		except:
 			print("An error occured while setting the icon.")
 	else:
-		img = tk.PhotoImage(file=application_path+'assets/icon.png')
+		img = tk.PhotoImage(file=application_path+'/assets/icon.png')
 		graphSelectWindow.tk.call('wm', 'iconphoto', graphSelectWindow._w, img)
 
 	# Variables
