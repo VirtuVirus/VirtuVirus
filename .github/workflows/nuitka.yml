@@ -23,9 +23,6 @@ jobs:
       run: python3 -m nuitka --lto=yes 
           --clang 
           --include-package=PIL._tkinter_finder 
-          --show-memory 
-          --show-modules 
-          --prefer-source-code 
           --assume-yes-for-downloads 
           --standalone 
           --onefile 
@@ -66,9 +63,6 @@ jobs:
           --lto=yes 
           --clang 
           --include-package=PIL._tkinter_finder 
-          --show-memory 
-          --show-modules 
-          --prefer-source-code 
           --assume-yes-for-downloads 
           --standalone 
           --onefile 
