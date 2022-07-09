@@ -18,15 +18,18 @@ jobs:
     - name: Install dependencies
       run: pip install -r requirements.txt
     - name: Install Nuitka
-      run: pip install Nuitka
+      run: pip install Nuitka ordered-set zstandard
     - name: Grab VirtuVirus Build Cache
       id: cache-virtuvirus-nuitka
       uses: actions/cache@v3
       with:
-        path: VirtuVirus.build
-        key: ${{ runner.os }}-virtuvirus-nuitka
+        path: ~/.cache/Nuitka
+        key: ${{ runner.os }}-virtuvirus-nuitka-cache
+    - name: Install ccache
+      run: sudo apt install ccache
     - name: Package with Nuitka
       run: python3 -m nuitka 
+          --lto=yes
           --include-data-dir=assets=assets 
           --clang 
           --include-package=PIL._tkinter_finder 
@@ -36,8 +39,10 @@ jobs:
           --linux-onefile-icon=assets/icon.png 
           --enable-plugin=tk-inter 
           --enable-plugin=numpy
-          --noinclude-scipy
           --enable-plugin=anti-bloat
+          --noinclude-scipy
+          --prefer-source-code
+          -o VirtuVirus.AppImage
           VirtuVirus.py
     - name: Extract current branch name
       shell: bash
@@ -48,7 +53,7 @@ jobs:
       with:
         name: virtuvirus-artifacts-nuitka-linux-${{ steps.ref.outputs.branch }}
         path: |
-          VirtuVirus.bin
+          VirtuVirus.AppImage
           LICENSE
           README.md
   
@@ -67,17 +72,17 @@ jobs:
     - name: Install dependencies
       run: pip install -r requirements.txt
     - name: Install Nuitka
-      run: pip install Nuitka
+      run: pip install Nuitka ordered-set zstandard
     - name: Grab VirtuVirus Build Cache
       id: cache-virtuvirus-nuitka
       uses: actions/cache@v3
       with:
-        path: VirtuVirus.build
-        key: ${{ runner.os }}-virtuvirus-nuitka
+        path: ~\AppData\Local\Nuitka\Nuitka
+        key: ${{ runner.os }}-virtuvirus-nuitka-cache
     - name: Package with Nuitka
       run: python3 -m nuitka
+          --lto=yes
           --include-data-dir=assets=assets 
-          --clang 
           --include-package=PIL._tkinter_finder 
           --assume-yes-for-downloads 
           --standalone 
@@ -86,8 +91,9 @@ jobs:
           --windows-icon-from-ico=assets/icon.ico 
           --enable-plugin=tk-inter 
           --enable-plugin=numpy
-          --noinclude-scipy
           --enable-plugin=anti-bloat
+          --noinclude-scipy
+          --prefer-source-code
           VirtuVirus.py
     - name: Extract current branch name
       shell: bash
