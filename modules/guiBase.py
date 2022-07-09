@@ -31,8 +31,8 @@ def defineGUI():
 	except Exception as error:
 		if "linux" in platform and "wayland" in error.__str__():
 			print("An error occured while initializing VirtuVirus.")
-			print("Tkinter's support for Wayland is fragile at best.")
-			print("Please switch to X11/Xorg or use a different terminal (like the one in VSCode).")
+			print("Your terminal seems to be incompatible with running Tkinter in the Wayland backend.")
+			print("Please try using a different terminal.")
 			exit(1)
 		else:
 			print("An error occured while initializing VirtuVirus. Is Tkinter functional on your system ?")

@@ -35,6 +35,9 @@ jobs:
           --onefile 
           --linux-onefile-icon=assets/icon.png 
           --enable-plugin=tk-inter 
+          --enable-plugin=numpy
+          --noinclude-scipy
+          --enable-plugin=anti-bloat
           VirtuVirus.py
     - name: Extract current branch name
       shell: bash
@@ -46,7 +49,6 @@ jobs:
         name: virtuvirus-artifacts-nuitka-linux-${{ steps.ref.outputs.branch }}
         path: |
           VirtuVirus.bin
-          assets
           LICENSE
           README.md
   
@@ -83,6 +85,9 @@ jobs:
           --windows-disable-console 
           --windows-icon-from-ico=assets/icon.ico 
           --enable-plugin=tk-inter 
+          --enable-plugin=numpy
+          --noinclude-scipy
+          --enable-plugin=anti-bloat
           VirtuVirus.py
     - name: Extract current branch name
       shell: bash
@@ -93,7 +98,6 @@ jobs:
       with:
         name: virtuvirus-artifacts-nuitka-windows-${{ steps.ref.outputs.branch }}
         path: |
-          assets
           VirtuVirus.exe
           LICENSE
           README.md
