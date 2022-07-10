@@ -41,7 +41,6 @@ jobs:
           --enable-plugin=numpy
           --enable-plugin=anti-bloat
           --noinclude-scipy
-          --prefer-source-code
           -o VirtuVirus.AppImage
           VirtuVirus.py
     - name: Extract current branch name
@@ -93,7 +92,6 @@ jobs:
           --enable-plugin=numpy
           --enable-plugin=anti-bloat
           --noinclude-scipy
-          --prefer-source-code
           VirtuVirus.py
     - name: Extract current branch name
       shell: bash
