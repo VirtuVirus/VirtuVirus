@@ -63,7 +63,10 @@ Additionally, agents can take other colors under certain conditions :
 
 ### Both the program and the source refuse to run on Linux when using Wayland.
 
-Tkinter's Wayland support is fragile, almost non-existant. Weirdly enough, I've noticed that running Tkinter programs using Visual Studio Code's terminal fixes this issue. Perhaps other terminals will also properly work.
+Your terminal is incompatible. Use another terminal.
+
+Known incompatible terminals :
+- xfce4-terminal
 
 ### The interface is frozen, what can I do ?
 

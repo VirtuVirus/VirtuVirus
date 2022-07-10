@@ -20,7 +20,7 @@ jobs:
     - name: Install PyInstaller
       run: pip install pyinstaller
     - name: Package with PyInstaller
-      run: pyinstaller --hidden-import='PIL._tkinter_finder' --onefile VirtuVirus.py
+      run: pyinstaller --add-data assets:assets --hidden-import='PIL._tkinter_finder' --onefile VirtuVirus.py
     - name: Post Packaging Step
       run: mv dist/VirtuVirus VirtuVirus
     - name: Extract current branch name
@@ -51,11 +51,9 @@ jobs:
     - name: Install PyInstaller
       run: pip install pyinstaller
     - name: Install UPX with Chocolatey for compression
-      uses: crazy-max/ghaction-chocolatey@v2
-      with:
-        args: install upx -y
+      run: choco install upx
     - name: Package with PyInstaller
-      run: pyinstaller --icon="assets/icon.ico" --hidden-import='PIL._tkinter_finder' --onefile VirtuVirus.py --noconsole
+      run: pyinstaller --icon="assets/icon.ico" --add-data "assets;assets" --hidden-import='PIL._tkinter_finder' --onefile VirtuVirus.py --noconsole
     - name: Post Packaging Step
       shell: bash
       run: mv dist/VirtuVirus.exe VirtuVirus.exe
@@ -68,6 +66,5 @@ jobs:
       with:
         name: virtuvirus-artifacts-windows-${{ steps.ref.outputs.branch }}
         path: |
-          assets
           VirtuVirus.exe
           LICENSE

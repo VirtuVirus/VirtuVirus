@@ -2,7 +2,6 @@
 import tkinter as tk
 import tkinter.ttk as ttk
 import tkinter.messagebox as tkmb
-from sys import platform, exit
 from PIL import Image, ImageTk
 
 # Internal Imports
@@ -17,14 +16,24 @@ from modules import graph
 # Dev Vars
 enableDebugButtons = False
 
+# Path
+import sys, os
+if getattr(sys, 'frozen', False):
+	application_path = sys._MEIPASS
+	application_path = application_path + "/"
+elif __file__:
+	application_path = os.path.dirname(__file__)
+	application_path = os.path.abspath(os.path.join(application_path, os.pardir))
+	application_path = application_path + "/"
+
 def defineGUI():
 	try:
 		root = tk.Tk()
 	except Exception as error:
-		if "linux" in platform and "wayland" in error.__str__():
+		if "linux" in sys.platform and "wayland" in error.__str__():
 			print("An error occured while initializing VirtuVirus.")
-			print("Tkinter's support for Wayland is fragile at best.")
-			print("Please switch to X11/Xorg or use a different terminal (like the one in VSCode).")
+			print("Your terminal seems to be incompatible with running Tkinter in the Wayland backend.")
+			print("Please try using a different terminal.")
 			exit(1)
 		else:
 			print("An error occured while initializing VirtuVirus. Is Tkinter functional on your system ?")
@@ -36,18 +45,18 @@ def defineGUI():
 	root.wm_title("VirtuVirus")
 
 	# Set icon
-	if "win" in platform:
+	if "win" in sys.platform and not "darwin" in sys.platform:
 		try:
-			root.wm_iconbitmap(default="assets/icon.ico")
+			root.wm_iconbitmap(default=application_path+"assets/icon.ico")
 		except:
 			print("An error occured while setting the icon.")
 	else:
-		img = tk.PhotoImage(file='assets/icon.png')
+		img = tk.PhotoImage(file=application_path+'assets/icon.png')
 		root.tk.call('wm', 'iconphoto', root._w, img)
 
 	# and theme
 	style = ttk.Style(root)
-	if "win" in platform:
+	if "win" in sys.platform:
 		style.theme_use('vista')
 	else:
 		style.theme_use('clam')
@@ -66,7 +75,7 @@ def defineGUI():
 	controlZone = guiUtils.createFrame(topZone, tk.LEFT)
 
 	# Add VirtuVirus Logo on top
-	logoFile = Image.open("assets/icon.png")
+	logoFile = Image.open(application_path+"assets/icon.png")
 	logoFile = logoFile.resize((int(defaultConfigVars.WIDTH/5.2), int(defaultConfigVars.HEIGHT/4)), Image.ANTIALIAS)
 	logoFile = ImageTk.PhotoImage(logoFile)
 	logoLabel = tk.Label(controlZone, image=logoFile)
@@ -142,13 +151,13 @@ def defineSettingsDialogBox(window_root):
 	settingsDialogBox.wm_transient(window_root)
 
 	# Set icon
-	if "win" in platform:
+	if "win" in sys.platform and not "darwin" in sys.platform:
 		try:
-			settingsDialogBox.wm_iconbitmap(default="assets/icon.ico")
+			settingsDialogBox.wm_iconbitmap(default=application_path+"assets/icon.ico")
 		except:
 			print("An error occured while setting the icon.")
 	else:
-		img = tk.PhotoImage(file='assets/icon.png')
+		img = tk.PhotoImage(file=application_path+'assets/icon.png')
 		settingsDialogBox.tk.call('wm', 'iconphoto', settingsDialogBox._w, img)
 	
 	mainSettingsFrame = guiUtils.createFrame(settingsDialogBox, tk.TOP, fill="both", expand=True)
@@ -490,13 +499,13 @@ def showGraphSelectWindow(window_root):
 	graphSelectWindow.wm_transient(window_root)
 
 	# Set icon
-	if "win" in platform:
+	if "win" in sys.platform and not "darwin" in sys.platform:
 		try:
-			graphSelectWindow.wm_iconbitmap(default="assets/icon.ico")
+			graphSelectWindow.wm_iconbitmap(default=application_path+"assets/icon.ico")
 		except:
 			print("An error occured while setting the icon.")
 	else:
-		img = tk.PhotoImage(file='assets/icon.png')
+		img = tk.PhotoImage(file=application_path+'assets/icon.png')
 		graphSelectWindow.tk.call('wm', 'iconphoto', graphSelectWindow._w, img)
 
 	# Variables
