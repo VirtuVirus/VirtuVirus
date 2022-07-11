@@ -40,7 +40,7 @@ When running from source, go to the root of the folder and run in a terminal :
 ```
 python3 VirtuVirus.py
 ```
-When using an executable, run it as you usually would run one on your system. Note that on Windows, you'll have to run the executable from its folder specifically. The executables will need to unpack their dependencies (and decompress them on Windows), so **allow some time for them to load**.
+When using an executable, run it as you usually would run one on your system. The executables will need to unpack their dependencies (and decompress them on Windows), so **allow some time for them to load**.
 
 Following these steps, you'll be able to access and use the VirtuVirus interface. Here's the buttons available and what they do :
 - **Start** : This button will start the simulation upon being pressed, you'll need to have them spawned using *"Modify Settings"* first.
