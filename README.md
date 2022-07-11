@@ -16,11 +16,14 @@ Made by [JordanViknar](https://github.com/JordanViknar) and [Charx19](https://gi
 
 ## How to download ?
 
-As of now, there are no official releases of VirtuVirus. The easiest way to obtain VirtuVirus is to grab the latest executable from the Actions tab.
-You can see *pyinstaller* jobs in that tab : access the commit you want to use, download the artifact adapted for your system, and run the executable.
-Currently, the executables provided are for Windows and Linux.
+The releases of VirtuVirus can be downloaded [here](https://github.com/VirtuVirus/VirtuVirus/releases).
 
-In the event you cannot/don't want to use them, it is possible to manually run the Python code straight from source.
+These executables come from the automatic packaging done on GitHub Actions with PyInstaller. Upon being started, they will automatically extract themselves in your system's temporary files, and start VirtuVirus using the bundled Python interpreter. It works in a similar way to AppImage binaries on Linux.
+Additionally, on Windows, the VirtuVirus executable will also decompress itself, since compression is enabled using UPX to reduce its size.
+
+Currently, the executables provided are for Windows and Linux. MacOS & other operating systems are not supported (yet ?).
+
+In the event you cannot/don't want to use them, it is also completely possible to manually run the Python code straight from source.
 
 ## Requirements (when using source)
 - *Python 3.10*
